@@ -1102,9 +1102,9 @@
     function authorToStepKey(author) {
       if (!author) return null;
       const a = author.toLowerCase();
-      if (a.includes("planner") || a.includes("plan") || a.includes("outline") || a.includes("validation")) return "plan";
-      if (a.includes("writer") || a.includes("write") || a.includes("blog")) return "write";
-      if (a.includes("blogger") || a.includes("root") || a.includes("orchestrat")) return "finalize";
+      if (/planner|plan|outline|validation/.test(a)) return "plan";
+      if (/writer|write|blog/.test(a)) return "write";
+      if (/blogger|root|orchestrat/.test(a)) return "finalize";
       return null;
     }
 
