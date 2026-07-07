@@ -11,7 +11,7 @@ AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 app = get_fast_api_app(
     agents_dir=AGENT_DIR, 
     web=False,
-    allow_origins=["*"]
+    allow_origins=["https://adk-default-service-name-122956929515.us-west1.run.app", "http://localhost:8080"]
 )
 
 # Serve the web interface directly from the Cloud Run container

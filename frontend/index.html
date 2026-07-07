@@ -982,6 +982,7 @@
   <!-- ═══ DEPENDENCIES ═══ -->
   <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
 
   <script>
     /* ═══════════════════════════════════════════════════
@@ -1260,11 +1261,11 @@
     function renderArticlePreview(md) {
       skeletonEl.classList.remove("visible");
       outputCard.classList.add("visible");
-      articleBody.innerHTML = marked.parse(md);
+      articleBody.innerHTML = DOMPurify.sanitize(marked.parse(md));
     }
 
     function renderFinalArticle(md) {
-      articleBody.innerHTML = marked.parse(md);
+      articleBody.innerHTML = DOMPurify.sanitize(marked.parse(md));
       // Apply syntax highlighting to all code blocks
       articleBody.querySelectorAll("pre code").forEach((block) => {
         hljs.highlightElement(block);
