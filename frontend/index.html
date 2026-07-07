@@ -1226,7 +1226,7 @@
                 renderArticlePreview(rawMarkdown);
               }
             } catch (e) {
-              // Skip malformed SSE events
+              console.warn("Skipping malformed SSE event:", e, jsonStr);
             }
           }
         }
@@ -1244,11 +1244,7 @@
 
       } catch (err) {
         skeletonEl.classList.remove("visible");
-        if (CLOUD_RUN_URL === "YOUR_CLOUD_RUN_URL_HERE") {
-          showError("You haven't set your Cloud Run URL yet. Open this file and replace YOUR_CLOUD_RUN_URL_HERE near the top of the <script> block.");
-        } else {
-          showError(`Connection failed: ${err.message}`);
-        }
+        showError(`Connection failed: ${err.message}`);
         console.error("BloggerAgent error:", err);
       } finally {
         setLoading(false);
@@ -1277,8 +1273,8 @@
        ═══════════════════════════════════════════════════ */
     copyBtn.addEventListener("click", async () => {
       if (!rawMarkdown) return;
-      try {
-        await navigator.clipboard.writeText(rawMarkdown);
+
+      const showCopiedState = () => {
         copyIcon.textContent = "✓";
         copyLabel.textContent = "Copied!";
         copyBtn.classList.add("copied");
@@ -1287,6 +1283,11 @@
           copyLabel.textContent = "Copy Markdown";
           copyBtn.classList.remove("copied");
         }, 2000);
+      };
+
+      try {
+        await navigator.clipboard.writeText(rawMarkdown);
+        showCopiedState();
       } catch {
         // Fallback for file:// protocol where clipboard API may not work
         const textarea = document.createElement("textarea");
@@ -1295,14 +1296,7 @@
         textarea.select();
         document.execCommand("copy");
         document.body.removeChild(textarea);
-        copyIcon.textContent = "✓";
-        copyLabel.textContent = "Copied!";
-        copyBtn.classList.add("copied");
-        setTimeout(() => {
-          copyIcon.textContent = "📋";
-          copyLabel.textContent = "Copy Markdown";
-          copyBtn.classList.remove("copied");
-        }, 2000);
+        showCopiedState();
       }
     });
 
