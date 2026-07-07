@@ -10,7 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt uvicorn[standard]
 COPY agent.py .
 COPY __init__.py .
 COPY main.py .
-COPY .env .
 COPY frontend ./frontend
 
 # Cloud Run sets the PORT env variable (default 8080)
