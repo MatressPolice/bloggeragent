@@ -1195,6 +1195,7 @@
         const decoder = new TextDecoder();
         let buffer = "";
         let lastAuthor = null;
+        let isRenderPending = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -1223,7 +1224,13 @@
               const text = event?.content?.parts?.[0]?.text;
               if (text) {
                 rawMarkdown = text; // ADK sends cumulative text, not deltas
-                renderArticlePreview(rawMarkdown);
+                if (!isRenderPending) {
+                  isRenderPending = true;
+                  requestAnimationFrame(() => {
+                    renderArticlePreview(rawMarkdown);
+                    isRenderPending = false;
+                  });
+                }
               }
             } catch (e) {
               console.warn("Skipping malformed SSE event:", e, jsonStr);
