@@ -9,7 +9,7 @@ from google.adk.cli.fast_api import get_fast_api_app
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Create the ADK FastAPI app with agent discovery
-# We pass allow_origins=["*"] directly to get_fast_api_app so the ADK's built-in CORS
+# We pass specific allowed origins directly to get_fast_api_app so the ADK's built-in CORS
 # and OriginCheckMiddleware properly accept the frontend's cross-origin requests.
 app = get_fast_api_app(
     agents_dir=AGENT_DIR, 
