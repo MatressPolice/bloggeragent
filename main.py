@@ -1,4 +1,7 @@
 import os
+import secrets
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from google.adk.cli.fast_api import get_fast_api_app
 
@@ -13,6 +16,38 @@ app = get_fast_api_app(
     web=False,
     allow_origins=["https://adk-default-service-name-122956929515.us-west1.run.app", "http://localhost:8080"]
 )
+
+@app.middleware("http")
+async def verify_api_key(request: Request, call_next):
+    # Allow OPTIONS preflight requests to pass through
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    # Public endpoints that do not require authentication
+    public_paths = {"/", "/docs", "/openapi.json", "/redoc", "/health", "/version"}
+
+    # If this route is meant to be public or is a static file, skip auth
+    if request.url.path in public_paths or not request.url.path.startswith(("/run", "/list-apps", "/apps", "/version", "/health")):
+        # We assume endpoints that require auth start with one of the ADK prefixes,
+        # otherwise we let it pass for static files and frontend routes
+        return await call_next(request)
+
+    api_key = os.getenv("API_KEY")
+    if not api_key:
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "API_KEY environment variable is not set. The server is secured by default."}
+        )
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+
+    token = auth_header[7:]
+    if not secrets.compare_digest(token, api_key):
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+
+    return await call_next(request)
 
 # Serve the web interface directly from the Cloud Run container
 frontend_dir = os.path.join(AGENT_DIR, "frontend")
