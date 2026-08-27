@@ -56,3 +56,18 @@ def test_root_agent_config():
     assert root_agent.name == "Blogger"
     assert len(root_agent.tools) == 2
     assert "Multi-agent" in root_agent.description
+
+def test_root_agent_integration():
+    with patch("google.adk.agents.Agent.__call__") as mock_call:
+        mock_output = {"output": "Final Result with hooks and titles"}
+        mock_call.return_value = mock_output
+
+        request_input = {"request": "Write a post about AI."}
+        result = root_agent(request_input)
+
+        assert result == mock_output
+        mock_call.assert_called_once_with(request_input)
+
+        assert len(root_agent.tools) == 2
+        assert root_agent.tools[0].name == "RobustBlogPlanner"
+        assert root_agent.tools[1].name == "RobustBlogWriter"
