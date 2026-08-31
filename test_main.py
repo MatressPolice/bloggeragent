@@ -105,3 +105,24 @@ def test_auth_middleware_with_wrong_key():
         headers={"Authorization": "Bearer wrongkey"}
     )
     assert response.status_code == 401
+
+@patch.dict(os.environ, {"API_KEY": "supersecret"})
+def test_auth_middleware_with_invalid_header_format():
+    import main
+    client = TestClient(main.app)
+
+    # Missing "Bearer " prefix (Basic)
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "Basic supersecret"}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
+    # Missing prefix entirely
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "supersecret"}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
