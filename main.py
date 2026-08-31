@@ -1,5 +1,7 @@
 import os
 import secrets
+import posixpath
+from urllib.parse import unquote
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -26,11 +28,20 @@ async def verify_api_key(request: Request, call_next):
     # Public endpoints that do not require authentication
     public_paths = {"/", "/docs", "/openapi.json", "/redoc", "/health", "/version"}
 
-    # If this route is meant to be public or is a static file, skip auth
-    if request.url.path in public_paths or not request.url.path.startswith(("/run", "/list-apps", "/apps", "/version", "/health")):
-        # We assume endpoints that require auth start with one of the ADK prefixes,
-        # otherwise we let it pass for static files and frontend routes
+    norm_path = posixpath.normpath(unquote(request.url.path))
+
+    # If this route is meant to be public, skip auth
+    if norm_path in public_paths:
         return await call_next(request)
+
+    # Check if it's a valid static file in the frontend directory
+    frontend_dir = os.path.join(AGENT_DIR, "frontend")
+    if os.path.isdir(frontend_dir):
+        file_path = os.path.join(frontend_dir, norm_path.lstrip("/"))
+        if os.path.abspath(file_path).startswith(os.path.abspath(frontend_dir)) and os.path.isfile(file_path):
+            return await call_next(request)
+
+    # Anything else requires authentication (default-deny policy)
 
     api_key = os.getenv("API_KEY")
     if not api_key:
