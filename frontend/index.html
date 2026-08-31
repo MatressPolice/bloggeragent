@@ -1295,15 +1295,9 @@
       try {
         await navigator.clipboard.writeText(rawMarkdown);
         showCopiedState();
-      } catch {
-        // Fallback for file:// protocol where clipboard API may not work
-        const textarea = document.createElement("textarea");
-        textarea.value = rawMarkdown;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-        showCopiedState();
+      } catch (err) {
+        console.error("Failed to copy text: ", err);
+        alert("Clipboard API not available or failed. Please copy the text manually.");
       }
     });
 
