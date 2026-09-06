@@ -19,19 +19,19 @@ app = get_fast_api_app(
     allow_origins=["https://adk-default-service-name-122956929515.us-west1.run.app", "http://localhost:8080"]
 )
 
+# Public endpoints that do not require authentication
+PUBLIC_PATHS = {"/", "/docs", "/openapi.json", "/redoc", "/health", "/version"}
+
 @app.middleware("http")
 async def verify_api_key(request: Request, call_next):
     # Allow OPTIONS preflight requests to pass through
     if request.method == "OPTIONS":
         return await call_next(request)
 
-    # Public endpoints that do not require authentication
-    public_paths = {"/", "/docs", "/openapi.json", "/redoc", "/health", "/version"}
-
     norm_path = posixpath.normpath(unquote(request.url.path))
 
     # If this route is meant to be public, skip auth
-    if norm_path in public_paths:
+    if norm_path in PUBLIC_PATHS:
         return await call_next(request)
 
     # Check if it's a valid static file in the frontend directory
