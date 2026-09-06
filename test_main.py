@@ -126,3 +126,22 @@ def test_auth_middleware_with_invalid_header_format():
     )
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
+
+@patch.dict(os.environ, {"API_KEY": "supersecret"})
+def test_auth_middleware_bypass_attempts():
+    import main
+    client = TestClient(main.app)
+
+    # Attempting bypass using path traversal, url encoding, or extra slashes
+    bypass_paths = [
+        "/%72un",
+        "http://testserver//list-apps",
+        "/docs/../list-apps",
+        "/static/../list-apps",
+        "/nonexistent"
+    ]
+    for path in bypass_paths:
+        response = client.get(path)
+        assert response.status_code == 401, f"Failed for path {path}: expected 401, got {response.status_code}"
+        assert response.json()["detail"] == "Unauthorized"
+
