@@ -145,3 +145,20 @@ def test_auth_middleware_bypass_attempts():
         assert response.status_code == 401, f"Failed for path {path}: expected 401, got {response.status_code}"
         assert response.json()["detail"] == "Unauthorized"
 
+
+@patch.dict(os.environ, {"API_KEY": "supersecret"})
+def test_auth_middleware_options_request():
+    import main
+    import importlib
+    importlib.reload(main)
+    client = TestClient(main.app)
+
+    # OPTIONS request should bypass auth
+    response = client.options(
+        "/list-apps",
+        headers={
+            "Origin": "http://localhost:8080",
+            "Access-Control-Request-Method": "GET"
+        }
+    )
+    assert response.status_code == 200
