@@ -128,6 +128,34 @@ def test_auth_middleware_with_invalid_header_format():
     assert response.json()["detail"] == "Unauthorized"
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
+def test_static_file_auth_bypass():
+    import main
+
+    frontend_dir = os.path.join(main.AGENT_DIR, "frontend")
+    os.makedirs(frontend_dir, exist_ok=True)
+    test_file_path = os.path.join(frontend_dir, "test_bypass.css")
+
+    try:
+        # Create a test static file in the actual frontend directory
+        with open(test_file_path, "w") as f:
+            f.write("body { color: blue; }")
+
+        client = TestClient(main.app)
+
+        # Valid static file should bypass auth and return 200
+        response = client.get("/test_bypass.css")
+        assert response.status_code == 200
+        assert "body { color: blue; }" in response.text
+
+        # Non-existent static file should not bypass auth, returns 401
+        response = client.get("/nonexistent_file_test.css")
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Unauthorized"
+    finally:
+        if os.path.exists(test_file_path):
+            os.remove(test_file_path)
+
+@patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_bypass_attempts():
     import main
     client = TestClient(main.app)
