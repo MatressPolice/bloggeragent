@@ -71,7 +71,9 @@ def test_auth_middleware_with_key_unauthorized():
     client = TestClient(main.app)
 
     # Public endpoints should still be accessible
-    assert client.get("/docs").status_code == 200
+    for path in main.PUBLIC_PATHS:
+        response = client.get(path)
+        assert response.status_code != 401, f"Expected {path} to bypass auth, but got 401"
 
     # Protected endpoints should return 401
     response = client.get("/list-apps")
