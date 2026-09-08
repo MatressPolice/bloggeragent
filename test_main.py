@@ -145,3 +145,52 @@ def test_auth_middleware_bypass_attempts():
         assert response.status_code == 401, f"Failed for path {path}: expected 401, got {response.status_code}"
         assert response.json()["detail"] == "Unauthorized"
 
+
+def test_auth_middleware_path_traversal_static():
+    import tempfile
+    import asyncio
+    with tempfile.TemporaryDirectory() as tmpdir:
+        frontend_dir = os.path.join(tmpdir, "frontend")
+        os.makedirs(frontend_dir)
+        with open(os.path.join(frontend_dir, "index.html"), "w") as f:
+            f.write("hello")
+
+        with open(os.path.join(tmpdir, "frontend-secret.txt"), "w") as f:
+            f.write("secret")
+
+        real_abspath = os.path.abspath
+        def mock_abspath(path):
+            if path.endswith("main.py"):
+                return os.path.join(tmpdir, "main.py")
+            return real_abspath(path)
+
+        with patch("os.path.abspath", side_effect=mock_abspath):
+            with patch("main.AGENT_DIR", tmpdir):
+                with patch.dict(os.environ, {"API_KEY": "supersecret"}):
+                    import main
+                    import importlib
+                    importlib.reload(main)
+
+                    from fastapi import Request
+
+                    async def mock_call_next(request):
+                        class MockResponse:
+                            status_code = 200
+                        return MockResponse()
+
+                    # URL encoded path traversal
+                    scope = {
+                        "type": "http",
+                        "method": "GET",
+                        "url": "http://testserver/%2E%2E%2Ffrontend-secret.txt",
+                        "path": "%2E%2E%2Ffrontend-secret.txt",
+                        "headers": []
+                    }
+
+                    request = Request(scope)
+
+                    response = asyncio.run(main.verify_api_key(request, mock_call_next))
+
+                    # Before the fix, this bypassed auth check and returned 200 from mock_call_next
+                    # After the fix, it should return 401 Unauthorized
+                    assert response.status_code == 401
