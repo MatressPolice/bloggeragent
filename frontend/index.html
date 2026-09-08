@@ -1264,11 +1264,11 @@
     function renderArticlePreview(md) {
       skeletonEl.classList.remove("visible");
       outputCard.classList.add("visible");
-      articleBody.innerHTML = DOMPurify.sanitize(marked.parse(md), { USE_PROFILES: { html: true } });
+      articleBody.innerHTML = DOMPurify.sanitize(marked.parse(md));
     }
 
     function renderFinalArticle(md) {
-      articleBody.innerHTML = DOMPurify.sanitize(marked.parse(md), { USE_PROFILES: { html: true } });
+      articleBody.innerHTML = DOMPurify.sanitize(marked.parse(md));
       // Apply syntax highlighting to all code blocks
       articleBody.querySelectorAll("pre code").forEach((block) => {
         hljs.highlightElement(block);
