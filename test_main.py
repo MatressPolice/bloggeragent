@@ -4,6 +4,12 @@ from fastapi.testclient import TestClient
 
 import tempfile
 
+def get_client():
+    import main
+    import importlib
+    importlib.reload(main)
+    return TestClient(main.app)
+
 def test_frontend_static_mount():
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create a dummy frontend directory and index.html inside the tmpdir
@@ -20,11 +26,7 @@ def test_frontend_static_mount():
             return real_abspath(path)
 
         with patch("os.path.abspath", side_effect=mock_abspath):
-            import main
-            import importlib
-            importlib.reload(main)
-
-            client = TestClient(main.app)
+            client = get_client()
             response = client.get("/")
 
             assert response.status_code == 200
@@ -34,14 +36,7 @@ def test_no_frontend_endpoint():
     # Mock os.path.isdir to return False for the frontend directory
     # so that the fallback endpoint is registered instead of the static mount.
     with patch("os.path.isdir", return_value=False):
-        # We must import main inside the mocked context so the module-level 
-        # condition is evaluated with the mocked isdir.
-        import main
-        # Force reload in case it was already imported
-        import importlib
-        importlib.reload(main)
-        
-        client = TestClient(main.app)
+        client = get_client()
         response = client.get("/")
         
         assert response.status_code == 200
@@ -55,20 +50,14 @@ def test_auth_middleware_no_key_configured():
     # If API_KEY is not set, API should deny access by default (secure by default)
     if "API_KEY" in os.environ:
         del os.environ["API_KEY"]
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client = get_client()
     response = client.get("/list-apps")
     assert response.status_code == 401
     assert "API_KEY environment variable is not set" in response.json()["detail"]
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_key_unauthorized():
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client = get_client()
 
     # Public endpoints should still be accessible
     assert client.get("/docs").status_code == 200
@@ -80,10 +69,7 @@ def test_auth_middleware_with_key_unauthorized():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_key_authorized():
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client = get_client()
 
     # Using correct API key
     response = client.get(
@@ -94,10 +80,7 @@ def test_auth_middleware_with_key_authorized():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_wrong_key():
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client = get_client()
 
     # Using incorrect API key
     response = client.get(
@@ -108,8 +91,7 @@ def test_auth_middleware_with_wrong_key():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_invalid_header_format():
-    import main
-    client = TestClient(main.app)
+    client = get_client()
 
     # Missing "Bearer " prefix (Basic)
     response = client.get(
@@ -129,8 +111,7 @@ def test_auth_middleware_with_invalid_header_format():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_bypass_attempts():
-    import main
-    client = TestClient(main.app)
+    client = get_client()
 
     # Attempting bypass using path traversal, url encoding, or extra slashes
     bypass_paths = [
