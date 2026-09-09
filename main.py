@@ -13,10 +13,16 @@ AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Create the ADK FastAPI app with agent discovery
 # We pass specific allowed origins directly to get_fast_api_app so the ADK's built-in CORS
 # and OriginCheckMiddleware properly accept the frontend's cross-origin requests.
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS")
+if allowed_origins_env:
+    allow_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+else:
+    allow_origins = ["https://adk-default-service-name-122956929515.us-west1.run.app", "http://localhost:8080"]
+
 app = get_fast_api_app(
     agents_dir=AGENT_DIR, 
     web=False,
-    allow_origins=["https://adk-default-service-name-122956929515.us-west1.run.app", "http://localhost:8080"]
+    allow_origins=allow_origins
 )
 
 # Public endpoints that do not require authentication

@@ -145,7 +145,6 @@ def test_auth_middleware_bypass_attempts():
         assert response.status_code == 401, f"Failed for path {path}: expected 401, got {response.status_code}"
         assert response.json()["detail"] == "Unauthorized"
 
-
 def test_auth_middleware_path_traversal_static():
     import tempfile
     import asyncio
@@ -194,3 +193,34 @@ def test_auth_middleware_path_traversal_static():
                     # Before the fix, this bypassed auth check and returned 200 from mock_call_next
                     # After the fix, it should return 401 Unauthorized
                     assert response.status_code == 401
+
+
+@patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://custom-origin.example.com, http://localhost:3000 "})
+def test_custom_cors_origins():
+    import main
+    import importlib
+    importlib.reload(main)
+
+    assert "https://custom-origin.example.com" in main.allow_origins
+    assert "http://localhost:3000" in main.allow_origins
+    assert len(main.allow_origins) == 2
+
+    client = TestClient(main.app)
+    # Perform an OPTIONS request for CORS check. We just want to check if the route returns allowed headers for our origin
+    response = client.options("/", headers={"Origin": "https://custom-origin.example.com", "Access-Control-Request-Method": "GET"})
+
+    # Note: the exact headers might depend on ADK defaults, but we can just check if our env vars loaded properly
+    assert response.status_code == 200
+
+def test_default_cors_origins():
+    # Delete ALLOWED_ORIGINS if it exists
+    if "ALLOWED_ORIGINS" in os.environ:
+        del os.environ["ALLOWED_ORIGINS"]
+
+    import main
+    import importlib
+    importlib.reload(main)
+
+    assert "https://adk-default-service-name-122956929515.us-west1.run.app" in main.allow_origins
+    assert "http://localhost:8080" in main.allow_origins
+
