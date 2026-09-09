@@ -44,7 +44,7 @@ async def verify_api_key(request: Request, call_next):
     frontend_dir = os.path.join(AGENT_DIR, "frontend")
     if os.path.isdir(frontend_dir):
         file_path = os.path.join(frontend_dir, norm_path.lstrip("/"))
-        if os.path.abspath(file_path).startswith(os.path.abspath(frontend_dir)) and os.path.isfile(file_path):
+        if os.path.abspath(file_path).startswith(os.path.abspath(frontend_dir) + os.path.sep) and os.path.isfile(file_path):
             return await call_next(request)
 
     # Anything else requires authentication (default-deny policy)
