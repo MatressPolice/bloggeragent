@@ -59,7 +59,7 @@ def test_auth_middleware_no_key_configured():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_key_unauthorized():
-    client, _ = setup_test_client()
+    client, main = setup_test_client()
 
     # Public endpoints should still be accessible
     for path in main.PUBLIC_PATHS:
