@@ -244,3 +244,32 @@ def test_default_cors_origins():
 
     assert main.allow_origins == []
 
+def test_static_file_auth_bypass_success():
+    import main
+    import uuid
+    import shutil
+
+    frontend_dir = os.path.join(main.AGENT_DIR, "frontend")
+    frontend_created = False
+    if not os.path.exists(frontend_dir):
+        os.makedirs(frontend_dir)
+        frontend_created = True
+
+    test_filename = f"test_bypass_{uuid.uuid4().hex}.html"
+    test_filepath = os.path.join(frontend_dir, test_filename)
+
+    try:
+        with open(test_filepath, "w") as f:
+            f.write("<html><body>Bypass Test</body></html>")
+
+        with patch.dict(os.environ, {"API_KEY": "supersecret"}):
+            client = TestClient(main.app)
+            response = client.get(f"/{test_filename}")
+
+            assert response.status_code == 200
+            assert "Bypass Test" in response.text
+    finally:
+        if os.path.exists(test_filepath):
+            os.remove(test_filepath)
+        if frontend_created and os.path.exists(frontend_dir):
+            shutil.rmtree(frontend_dir)
