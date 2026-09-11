@@ -4,6 +4,12 @@ from fastapi.testclient import TestClient
 
 import tempfile
 
+def setup_test_client():
+    import main
+    import importlib
+    importlib.reload(main)
+    return TestClient(main.app), main
+
 def test_frontend_static_mount():
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create a dummy frontend directory and index.html inside the tmpdir
@@ -20,11 +26,7 @@ def test_frontend_static_mount():
             return real_abspath(path)
 
         with patch("os.path.abspath", side_effect=mock_abspath):
-            import main
-            import importlib
-            importlib.reload(main)
-
-            client = TestClient(main.app)
+            client, _ = setup_test_client()
             response = client.get("/")
 
             assert response.status_code == 200
@@ -36,12 +38,7 @@ def test_no_frontend_endpoint():
     with patch("os.path.isdir", return_value=False):
         # We must import main inside the mocked context so the module-level 
         # condition is evaluated with the mocked isdir.
-        import main
-        # Force reload in case it was already imported
-        import importlib
-        importlib.reload(main)
-        
-        client = TestClient(main.app)
+        client, _ = setup_test_client()
         response = client.get("/")
         
         assert response.status_code == 200
@@ -55,20 +52,14 @@ def test_auth_middleware_no_key_configured():
     # If API_KEY is not set, API should deny access by default (secure by default)
     if "API_KEY" in os.environ:
         del os.environ["API_KEY"]
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client, _ = setup_test_client()
     response = client.get("/list-apps")
     assert response.status_code == 401
     assert "API_KEY environment variable is not set" in response.json()["detail"]
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_key_unauthorized():
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client, main = setup_test_client()
 
     # Public endpoints should still be accessible
     for path in main.PUBLIC_PATHS:
@@ -81,10 +72,7 @@ def test_auth_middleware_with_key_unauthorized():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_key_authorized():
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client, _ = setup_test_client()
 
     # Using correct API key
     response = client.get(
@@ -95,10 +83,7 @@ def test_auth_middleware_with_key_authorized():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_wrong_key():
-    import main
-    import importlib
-    importlib.reload(main)
-    client = TestClient(main.app)
+    client, _ = setup_test_client()
 
     # Using incorrect API key
     response = client.get(
@@ -109,8 +94,7 @@ def test_auth_middleware_with_wrong_key():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_with_invalid_header_format():
-    import main
-    client = TestClient(main.app)
+    client, _ = setup_test_client()
 
     # Missing "Bearer " prefix (Basic)
     response = client.get(
@@ -150,8 +134,7 @@ def test_auth_middleware_options_preflight():
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_bypass_attempts():
-    import main
-    client = TestClient(main.app)
+    client, _ = setup_test_client()
 
     # Attempting bypass using path traversal, url encoding, or extra slashes
     bypass_paths = [
@@ -187,9 +170,7 @@ def test_auth_middleware_path_traversal_static():
         with patch("os.path.abspath", side_effect=mock_abspath):
             with patch("main.AGENT_DIR", tmpdir):
                 with patch.dict(os.environ, {"API_KEY": "supersecret"}):
-                    import main
-                    import importlib
-                    importlib.reload(main)
+                    _, main = setup_test_client()
 
                     from fastapi import Request
 
@@ -218,15 +199,12 @@ def test_auth_middleware_path_traversal_static():
 
 @patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://custom-origin.example.com, http://localhost:3000 "})
 def test_custom_cors_origins():
-    import main
-    import importlib
-    importlib.reload(main)
+    client, main = setup_test_client()
 
     assert "https://custom-origin.example.com" in main.allow_origins
     assert "http://localhost:3000" in main.allow_origins
     assert len(main.allow_origins) == 2
 
-    client = TestClient(main.app)
     # Perform an OPTIONS request for CORS check. We just want to check if the route returns allowed headers for our origin
     response = client.options("/", headers={"Origin": "https://custom-origin.example.com", "Access-Control-Request-Method": "GET"})
 
@@ -238,9 +216,7 @@ def test_default_cors_origins():
     if "ALLOWED_ORIGINS" in os.environ:
         del os.environ["ALLOWED_ORIGINS"]
 
-    import main
-    import importlib
-    importlib.reload(main)
+    _, main = setup_test_client()
 
     assert main.allow_origins == []
 
