@@ -1,4 +1,5 @@
 import os
+import asyncio
 import secrets
 import posixpath
 from urllib.parse import unquote
@@ -39,9 +40,9 @@ async def verify_api_key(request: Request, call_next):
         return await call_next(request)
 
     # Check if it's a valid static file in the frontend directory
-    if os.path.isdir(FRONTEND_DIR):
+    if await asyncio.to_thread(os.path.isdir, FRONTEND_DIR):
         file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-        if os.path.abspath(file_path).startswith(os.path.abspath(FRONTEND_DIR) + os.path.sep) and os.path.isfile(file_path):
+        if os.path.abspath(file_path).startswith(os.path.abspath(FRONTEND_DIR) + os.path.sep) and await asyncio.to_thread(os.path.isfile, file_path):
             return await call_next(request)
 
     # Anything else requires authentication (default-deny policy)
