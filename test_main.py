@@ -128,6 +128,26 @@ def test_auth_middleware_with_invalid_header_format():
     assert response.json()["detail"] == "Unauthorized"
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
+def test_auth_middleware_options_preflight():
+    import main
+    import importlib
+    importlib.reload(main)
+    client = TestClient(main.app)
+
+    # OPTIONS request to a protected path should return 200 OK
+    # due to the preflight bypass in verify_api_key.
+    # We must include proper CORS headers for the CORSMiddleware to intercept
+    # and return 200 instead of the router returning 405 Method Not Allowed.
+    response = client.options(
+        "/list-apps",
+        headers={
+            "Origin": "http://localhost:8080",
+            "Access-Control-Request-Method": "GET",
+        }
+    )
+    assert response.status_code == 200
+
+@patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_bypass_attempts():
     import main
     client = TestClient(main.app)
