@@ -62,7 +62,8 @@ def test_auth_middleware_with_key_unauthorized():
     client, _ = setup_test_client()
 
     # Public endpoints should still be accessible
-    assert client.get("/docs").status_code == 200
+    for path in main.PUBLIC_PATHS:
+        assert client.get(path).status_code == 200
 
     # Protected endpoints should return 401
     response = client.get("/list-apps")
@@ -110,6 +111,26 @@ def test_auth_middleware_with_invalid_header_format():
     )
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
+
+@patch.dict(os.environ, {"API_KEY": "supersecret", "ALLOWED_ORIGINS": "http://localhost:8080"})
+def test_auth_middleware_options_preflight():
+    import main
+    import importlib
+    importlib.reload(main)
+    client = TestClient(main.app)
+
+    # OPTIONS request to a protected path should return 200 OK
+    # due to the preflight bypass in verify_api_key.
+    # We must include proper CORS headers for the CORSMiddleware to intercept
+    # and return 200 instead of the router returning 405 Method Not Allowed.
+    response = client.options(
+        "/list-apps",
+        headers={
+            "Origin": "http://localhost:8080",
+            "Access-Control-Request-Method": "GET",
+        }
+    )
+    assert response.status_code == 200
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_bypass_attempts():
@@ -197,6 +218,34 @@ def test_default_cors_origins():
 
     _, main = setup_test_client()
 
-    assert "https://adk-default-service-name-122956929515.us-west1.run.app" in main.allow_origins
-    assert "http://localhost:8080" in main.allow_origins
+    assert main.allow_origins == []
 
+def test_static_file_auth_bypass_success():
+    import main
+    import uuid
+    import shutil
+
+    frontend_dir = os.path.join(main.AGENT_DIR, "frontend")
+    frontend_created = False
+    if not os.path.exists(frontend_dir):
+        os.makedirs(frontend_dir)
+        frontend_created = True
+
+    test_filename = f"test_bypass_{uuid.uuid4().hex}.html"
+    test_filepath = os.path.join(frontend_dir, test_filename)
+
+    try:
+        with open(test_filepath, "w") as f:
+            f.write("<html><body>Bypass Test</body></html>")
+
+        with patch.dict(os.environ, {"API_KEY": "supersecret"}):
+            client = TestClient(main.app)
+            response = client.get(f"/{test_filename}")
+
+            assert response.status_code == 200
+            assert "Bypass Test" in response.text
+    finally:
+        if os.path.exists(test_filepath):
+            os.remove(test_filepath)
+        if frontend_created and os.path.exists(frontend_dir):
+            shutil.rmtree(frontend_dir)
