@@ -71,7 +71,8 @@ def test_auth_middleware_with_key_unauthorized():
     client = TestClient(main.app)
 
     # Public endpoints should still be accessible
-    assert client.get("/docs").status_code == 200
+    for path in main.PUBLIC_PATHS:
+        assert client.get(path).status_code == 200
 
     # Protected endpoints should return 401
     response = client.get("/list-apps")
@@ -126,6 +127,26 @@ def test_auth_middleware_with_invalid_header_format():
     )
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
+
+@patch.dict(os.environ, {"API_KEY": "supersecret", "ALLOWED_ORIGINS": "http://localhost:8080"})
+def test_auth_middleware_options_preflight():
+    import main
+    import importlib
+    importlib.reload(main)
+    client = TestClient(main.app)
+
+    # OPTIONS request to a protected path should return 200 OK
+    # due to the preflight bypass in verify_api_key.
+    # We must include proper CORS headers for the CORSMiddleware to intercept
+    # and return 200 instead of the router returning 405 Method Not Allowed.
+    response = client.options(
+        "/list-apps",
+        headers={
+            "Origin": "http://localhost:8080",
+            "Access-Control-Request-Method": "GET",
+        }
+    )
+    assert response.status_code == 200
 
 @patch.dict(os.environ, {"API_KEY": "supersecret"})
 def test_auth_middleware_bypass_attempts():
@@ -221,6 +242,5 @@ def test_default_cors_origins():
     import importlib
     importlib.reload(main)
 
-    assert "https://adk-default-service-name-122956929515.us-west1.run.app" in main.allow_origins
-    assert "http://localhost:8080" in main.allow_origins
+    assert main.allow_origins == []
 
