@@ -221,6 +221,5 @@ def test_default_cors_origins():
     import importlib
     importlib.reload(main)
 
-    assert "https://adk-default-service-name-122956929515.us-west1.run.app" in main.allow_origins
-    assert "http://localhost:8080" in main.allow_origins
+    assert main.allow_origins == []
 
