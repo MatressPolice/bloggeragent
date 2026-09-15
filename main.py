@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from google.adk.cli.fast_api import get_fast_api_app
 
+API_KEY = os.getenv("API_KEY")
+
 # Point to the directory containing your agent package
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(AGENT_DIR, "frontend")
@@ -47,7 +49,7 @@ async def verify_api_key(request: Request, call_next):
 
     # Anything else requires authentication (default-deny policy)
 
-    api_key = os.getenv("API_KEY")
+    api_key = API_KEY
     if not api_key:
         return JSONResponse(
             status_code=401,

@@ -4,10 +4,11 @@ from fastapi.testclient import TestClient
 
 import tempfile
 
-def setup_test_client():
+def setup_test_client(reload=False):
     import main
-    import importlib
-    importlib.reload(main)
+    if reload:
+        import importlib
+        importlib.reload(main)
     return TestClient(main.app), main
 
 def test_frontend_static_mount():
@@ -26,7 +27,7 @@ def test_frontend_static_mount():
             return real_abspath(path)
 
         with patch("os.path.abspath", side_effect=mock_abspath):
-            client, _ = setup_test_client()
+            client, _ = setup_test_client(reload=True)
             response = client.get("/")
 
             assert response.status_code == 200
@@ -38,7 +39,7 @@ def test_no_frontend_endpoint():
     with patch("os.path.isdir", return_value=False):
         # We must import main inside the mocked context so the module-level 
         # condition is evaluated with the mocked isdir.
-        client, _ = setup_test_client()
+        client, _ = setup_test_client(reload=True)
         response = client.get("/")
         
         assert response.status_code == 200
@@ -50,16 +51,16 @@ def test_no_frontend_endpoint():
 
 def test_auth_middleware_no_key_configured():
     # If API_KEY is not set, API should deny access by default (secure by default)
-    if "API_KEY" in os.environ:
-        del os.environ["API_KEY"]
-    client, _ = setup_test_client()
+    import main
+    main.API_KEY = None
+    client, _ = setup_test_client(reload=False)
     response = client.get("/list-apps")
     assert response.status_code == 401
     assert "API_KEY environment variable is not set" in response.json()["detail"]
 
-@patch.dict(os.environ, {"API_KEY": "supersecret"})
+@patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_key_unauthorized():
-    client, main = setup_test_client()
+    client, main = setup_test_client(reload=False)
 
     # Public endpoints should still be accessible
     for path in main.PUBLIC_PATHS:
@@ -70,9 +71,9 @@ def test_auth_middleware_with_key_unauthorized():
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
 
-@patch.dict(os.environ, {"API_KEY": "supersecret"})
+@patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_key_authorized():
-    client, _ = setup_test_client()
+    client, _ = setup_test_client(reload=False)
 
     # Using correct API key
     response = client.get(
@@ -81,9 +82,9 @@ def test_auth_middleware_with_key_authorized():
     )
     assert response.status_code == 200
 
-@patch.dict(os.environ, {"API_KEY": "supersecret"})
+@patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_wrong_key():
-    client, _ = setup_test_client()
+    client, _ = setup_test_client(reload=False)
 
     # Using incorrect API key
     response = client.get(
@@ -92,9 +93,9 @@ def test_auth_middleware_with_wrong_key():
     )
     assert response.status_code == 401
 
-@patch.dict(os.environ, {"API_KEY": "supersecret"})
+@patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_invalid_header_format():
-    client, _ = setup_test_client()
+    client, _ = setup_test_client(reload=False)
 
     # Missing "Bearer " prefix (Basic)
     response = client.get(
@@ -112,7 +113,8 @@ def test_auth_middleware_with_invalid_header_format():
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
 
-@patch.dict(os.environ, {"API_KEY": "supersecret", "ALLOWED_ORIGINS": "http://localhost:8080"})
+@patch('main.API_KEY', 'supersecret')
+@patch.dict(os.environ, {"ALLOWED_ORIGINS": "http://localhost:8080"})
 def test_auth_middleware_options_preflight():
     import main
     import importlib
@@ -132,9 +134,9 @@ def test_auth_middleware_options_preflight():
     )
     assert response.status_code == 200
 
-@patch.dict(os.environ, {"API_KEY": "supersecret"})
+@patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_bypass_attempts():
-    client, _ = setup_test_client()
+    client, _ = setup_test_client(reload=False)
 
     # Attempting bypass using path traversal, url encoding, or extra slashes
     bypass_paths = [
@@ -169,7 +171,7 @@ def test_auth_middleware_path_traversal_static():
 
         with patch("os.path.abspath", side_effect=mock_abspath):
             with patch("main.AGENT_DIR", tmpdir):
-                with patch.dict(os.environ, {"API_KEY": "supersecret"}):
+                with patch('main.API_KEY', 'supersecret'):
                     _, main = setup_test_client()
 
                     from fastapi import Request
@@ -199,7 +201,7 @@ def test_auth_middleware_path_traversal_static():
 
 @patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://custom-origin.example.com, http://localhost:3000 "})
 def test_custom_cors_origins():
-    client, main = setup_test_client()
+    client, main = setup_test_client(reload=True)
 
     assert "https://custom-origin.example.com" in main.allow_origins
     assert "http://localhost:3000" in main.allow_origins
@@ -216,7 +218,7 @@ def test_default_cors_origins():
     if "ALLOWED_ORIGINS" in os.environ:
         del os.environ["ALLOWED_ORIGINS"]
 
-    _, main = setup_test_client()
+    _, main = setup_test_client(reload=True)
 
     assert main.allow_origins == []
 
@@ -238,7 +240,7 @@ def test_static_file_auth_bypass_success():
         with open(test_filepath, "w") as f:
             f.write("<html><body>Bypass Test</body></html>")
 
-        with patch.dict(os.environ, {"API_KEY": "supersecret"}):
+        with patch('main.API_KEY', 'supersecret'):
             client = TestClient(main.app)
             response = client.get(f"/{test_filename}")
 
