@@ -34,6 +34,8 @@ async def verify_api_key(request: Request, call_next):
         return await call_next(request)
 
     norm_path = posixpath.normpath(unquote(request.url.path))
+    if norm_path.startswith("//"):
+        norm_path = "/" + norm_path.lstrip("/")
 
     # If this route is meant to be public, skip auth
     if norm_path in PUBLIC_PATHS:
