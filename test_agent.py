@@ -1,3 +1,4 @@
+import pytest
 from unittest.mock import patch
 from agent import (
     BlogPostValidationChecker,
@@ -9,29 +10,32 @@ from agent import (
     root_agent
 )
 
-def test_blog_post_validation_checker():
+@pytest.fixture
+def mock_agent_call():
+    with patch("google.adk.agents.Agent.__call__") as mock_call:
+        yield mock_call
+
+def test_blog_post_validation_checker(mock_agent_call):
     checker = BlogPostValidationChecker()
     assert checker.name == "BlogPostValidationChecker"
     assert "Validates the final written post" in checker.description
     assert checker.output_key == "validation_result"
     
-    with patch("google.adk.agents.Agent.__call__") as mock_call:
-        mock_call.return_value = {"validation_result": "ok"}
-        result = checker({"blog_post": "Here is a blog post."})
-        assert result["validation_result"] == "ok"
-        mock_call.assert_called_once_with({"blog_post": "Here is a blog post."})
+    mock_agent_call.return_value = {"validation_result": "ok"}
+    result = checker({"blog_post": "Here is a blog post."})
+    assert result["validation_result"] == "ok"
+    mock_agent_call.assert_called_once_with({"blog_post": "Here is a blog post."})
 
-def test_outline_validation_checker():
+def test_outline_validation_checker(mock_agent_call):
     checker = OutlineValidationChecker()
     assert checker.name == "OutlineValidationChecker"
     assert "Validates that the outline meets structural requirements" in checker.description
     assert checker.output_key == "validation_result"
     
-    with patch("google.adk.agents.Agent.__call__") as mock_call:
-        mock_call.return_value = {"validation_result": "ok"}
-        result = checker({"blog_outline": "Here is an outline."})
-        assert result["validation_result"] == "ok"
-        mock_call.assert_called_once_with({"blog_outline": "Here is an outline."})
+    mock_agent_call.return_value = {"validation_result": "ok"}
+    result = checker({"blog_outline": "Here is an outline."})
+    assert result["validation_result"] == "ok"
+    mock_agent_call.assert_called_once_with({"blog_outline": "Here is an outline."})
 
 def test_blog_planner_config():
     assert blog_planner.name == "BlogPlanner"
@@ -57,17 +61,16 @@ def test_root_agent_config():
     assert len(root_agent.tools) == 2
     assert "Multi-agent" in root_agent.description
 
-def test_root_agent_integration():
-    with patch("google.adk.agents.Agent.__call__") as mock_call:
-        mock_output = {"output": "Final Result with hooks and titles"}
-        mock_call.return_value = mock_output
+def test_root_agent_integration(mock_agent_call):
+    mock_output = {"output": "Final Result with hooks and titles"}
+    mock_agent_call.return_value = mock_output
 
-        request_input = {"request": "Write a post about AI."}
-        result = root_agent(request_input)
+    request_input = {"request": "Write a post about AI."}
+    result = root_agent(request_input)
 
-        assert result == mock_output
-        mock_call.assert_called_once_with(request_input)
+    assert result == mock_output
+    mock_agent_call.assert_called_once_with(request_input)
 
-        assert len(root_agent.tools) == 2
-        assert root_agent.tools[0].name == "RobustBlogPlanner"
-        assert root_agent.tools[1].name == "RobustBlogWriter"
+    assert len(root_agent.tools) == 2
+    assert root_agent.tools[0].name == "RobustBlogPlanner"
+    assert root_agent.tools[1].name == "RobustBlogWriter"
