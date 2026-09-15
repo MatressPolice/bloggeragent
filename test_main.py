@@ -112,6 +112,14 @@ def test_auth_middleware_with_invalid_header_format():
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
 
+    # Empty token ("Bearer " without token)
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "Bearer "}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
 @patch.dict(os.environ, {"API_KEY": "supersecret", "ALLOWED_ORIGINS": "http://localhost:8080"})
 def test_auth_middleware_options_preflight():
     import main
