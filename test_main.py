@@ -151,6 +151,7 @@ def test_auth_middleware_bypass_attempts():
     bypass_paths = [
         "/%72un",
         "http://testserver//list-apps",
+        "http://testserver///list-apps",
         "/docs/../list-apps",
         "/static/../list-apps",
         "/nonexistent"
