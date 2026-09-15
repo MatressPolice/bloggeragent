@@ -176,6 +176,16 @@
         color var(--duration-normal) var(--ease-out);
     }
 
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Skip focus outline for .topic-input as it has its own custom focus styles */
+    .topic-input:focus-visible {
+      outline: none;
+    }
+
     /* ═══════════════════════════════════════════════════
    AMBIENT BACKGROUND
    ═══════════════════════════════════════════════════ */
@@ -389,6 +399,18 @@
       white-space: nowrap;
       transition: all var(--duration-fast) var(--ease-out);
       box-shadow: var(--shadow-sm);
+    }
+
+    .btn-shortcut {
+      font-size: var(--text-xs);
+      font-family: var(--font-sans);
+      opacity: 0.8;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.1rem 0.3rem;
+      border-radius: var(--radius-sm);
+      margin-left: var(--space-xs);
+      font-weight: 500;
+      letter-spacing: 0.05em;
     }
 
     .generate-btn:hover:not(:disabled) {
@@ -912,7 +934,7 @@
           required autocomplete="off" aria-label="Blog topic" />
         <button type="submit" id="generateBtn" class="generate-btn">
           <span class="btn-icon">✦</span>
-          <span class="btn-text">Generate</span>
+          <span class="btn-text">Generate<span id="btnShortcut" class="btn-shortcut"></span></span>
           <span class="btn-spinner"></span>
         </button>
       </form>
@@ -1330,13 +1352,20 @@
       generateArticle(topic);
     });
 
-    // Allow Ctrl+Enter to submit
-    topicInput.addEventListener("keydown", (e) => {
+    // Allow Ctrl+Enter to submit (global scope to make it fully intuitive)
+    document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         form.dispatchEvent(new Event("submit"));
       }
     });
+
+    // Populate keyboard shortcut hint based on OS
+    const isMac = navigator.userAgent.toLowerCase().includes("mac");
+    const shortcutEl = $("#btnShortcut");
+    if (shortcutEl) {
+      shortcutEl.textContent = isMac ? "⌘ ↵" : "Ctrl ↵";
+    }
 
     // STARTUP CHECK (Removed: now handles domain dynamically)
   </script>
