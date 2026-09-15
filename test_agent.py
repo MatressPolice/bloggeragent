@@ -64,6 +64,57 @@ def test_robust_blog_writer_config():
     assert len(robust_blog_writer.sub_agents) == 2
     assert robust_blog_writer.max_iterations == 3
 
+def test_robust_blog_writer_integration():
+    from google.adk.runners import Runner
+    from google.adk.sessions import InMemorySessionService
+    from google.adk.agents.base_agent import Event
+    from google.adk.events.event_actions import EventActions
+    from google.genai.types import Content, Part
+
+    with patch.object(robust_blog_writer.sub_agents[0], "_run_async_impl") as mock_writer, \
+         patch.object(robust_blog_writer.sub_agents[1], "_run_async_impl") as mock_validator:
+
+        async def mock_writer_1(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="First draft")]), actions=EventActions(state_delta={"blog_post": "First draft"}))
+
+        async def mock_writer_2(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="Second draft")]), actions=EventActions(state_delta={"blog_post": "Second draft"}))
+
+        async def mock_validator_1(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="retry")]), actions=EventActions(state_delta={"validation_result": "retry"}))
+
+        async def mock_validator_2(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="ok")]), actions=EventActions(state_delta={"validation_result": "ok"}, escalate=True))
+
+        mock_writer.side_effect = [mock_writer_1(), mock_writer_2()]
+        mock_validator.side_effect = [mock_validator_1(), mock_validator_2()]
+
+        async def run_test():
+            session_service = InMemorySessionService()
+            session = await session_service.create_session(app_name="test_app", user_id="user1")
+            runner = Runner(app_name="test_app", agent=robust_blog_writer, session_service=session_service)
+
+            request_input = {"blog_outline": "My outline"}
+
+            try:
+                async for _ in runner.run_async(
+                    user_id="user1",
+                    session_id=session.id,
+                    state_delta=request_input,
+                    new_message=Content(parts=[Part.from_text(text="Start")])
+                ):
+                    pass
+            except RuntimeError:
+                pass
+
+            assert mock_writer.call_count == 2
+            assert mock_validator.call_count == 2
+            final_state = await session_service.get_session(app_name="test_app", user_id="user1", session_id=session.id)
+            assert final_state.state.get("validation_result") == "ok"
+            assert final_state.state.get("blog_post") == "Second draft"
+
+        asyncio.run(run_test())
+
 def test_root_agent_config():
     assert root_agent.name == "Blogger"
     assert len(root_agent.tools) == 2
