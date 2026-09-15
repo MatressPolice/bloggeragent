@@ -64,8 +64,6 @@ def test_robust_blog_writer_config():
     assert len(robust_blog_writer.sub_agents) == 2
     assert robust_blog_writer.max_iterations == 3
 
-import asyncio
-
 def test_robust_blog_writer_integration():
     from google.adk.runners import Runner
     from google.adk.sessions import InMemorySessionService
