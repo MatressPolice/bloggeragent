@@ -8,9 +8,13 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from google.adk.cli.fast_api import get_fast_api_app
 
+API_KEY = os.getenv("API_KEY")
+
 # Point to the directory containing your agent package
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(AGENT_DIR, "frontend")
+FRONTEND_DIR_EXISTS = os.path.isdir(FRONTEND_DIR)
+FRONTEND_DIR_ABSPATH_PREFIX = os.path.abspath(FRONTEND_DIR) + os.path.sep
 
 # Create the ADK FastAPI app with agent discovery
 # We pass specific allowed origins directly to get_fast_api_app so the ADK's built-in CORS
@@ -34,20 +38,22 @@ async def verify_api_key(request: Request, call_next):
         return await call_next(request)
 
     norm_path = posixpath.normpath(unquote(request.url.path))
+    if norm_path.startswith("//"):
+        norm_path = "/" + norm_path.lstrip("/")
 
     # If this route is meant to be public, skip auth
     if norm_path in PUBLIC_PATHS:
         return await call_next(request)
 
     # Check if it's a valid static file in the frontend directory
-    if await asyncio.to_thread(os.path.isdir, FRONTEND_DIR):
+    if FRONTEND_DIR_EXISTS:
         file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-        if os.path.abspath(file_path).startswith(os.path.abspath(FRONTEND_DIR) + os.path.sep) and await asyncio.to_thread(os.path.isfile, file_path):
+        if os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path):
             return await call_next(request)
 
     # Anything else requires authentication (default-deny policy)
 
-    api_key = os.getenv("API_KEY")
+    api_key = API_KEY
     if not api_key:
         return JSONResponse(
             status_code=401,
@@ -65,7 +71,7 @@ async def verify_api_key(request: Request, call_next):
     return await call_next(request)
 
 # Serve the web interface directly from the Cloud Run container
-if os.path.isdir(FRONTEND_DIR):
+if FRONTEND_DIR_EXISTS:
     app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 else:
     @app.get("/")
