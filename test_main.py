@@ -1,8 +1,17 @@
 import os
 from unittest.mock import patch
 from fastapi.testclient import TestClient
+import pytest
 
 import tempfile
+
+@pytest.fixture
+def mock_frontend_dir(tmp_path):
+    """Fixture that creates a temporary frontend directory with an index.html file."""
+    frontend_dir = tmp_path / "frontend"
+    frontend_dir.mkdir(parents=True, exist_ok=True)
+    (frontend_dir / "index.html").write_text("<html><body>Mocked Frontend</body></html>")
+    return frontend_dir
 
 def setup_test_client():
     import main
@@ -10,27 +19,22 @@ def setup_test_client():
     importlib.reload(main)
     return TestClient(main.app), main
 
-def test_frontend_static_mount():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Create a dummy frontend directory and index.html inside the tmpdir
-        frontend_dir = os.path.join(tmpdir, "frontend")
-        os.makedirs(frontend_dir)
-        with open(os.path.join(frontend_dir, "index.html"), "w") as f:
-            f.write("<html><body>Mocked Frontend</body></html>")
+def test_frontend_static_mount(mock_frontend_dir):
+    tmpdir = str(mock_frontend_dir.parent)
 
-        # Patch os.path.abspath so that main.AGENT_DIR becomes tmpdir without changing signature
-        real_abspath = os.path.abspath
-        def mock_abspath(path):
-            if path.endswith("main.py"):
-                return os.path.join(tmpdir, "main.py")
-            return real_abspath(path)
+    # Patch os.path.abspath so that main.AGENT_DIR becomes tmpdir without changing signature
+    real_abspath = os.path.abspath
+    def mock_abspath(path):
+        if path.endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_abspath(path)
 
-        with patch("os.path.abspath", side_effect=mock_abspath):
-            client, _ = setup_test_client()
-            response = client.get("/")
+    with patch("os.path.abspath", side_effect=mock_abspath):
+        client, _ = setup_test_client()
+        response = client.get("/")
 
-            assert response.status_code == 200
-            assert "Mocked Frontend" in response.text
+        assert response.status_code == 200
+        assert "Mocked Frontend" in response.text
 
 def test_no_frontend_endpoint():
     # Mock os.path.isdir to return False for the frontend directory
@@ -149,52 +153,47 @@ def test_auth_middleware_bypass_attempts():
         assert response.status_code == 401, f"Failed for path {path}: expected 401, got {response.status_code}"
         assert response.json()["detail"] == "Unauthorized"
 
-def test_auth_middleware_path_traversal_static():
-    import tempfile
+def test_auth_middleware_path_traversal_static(mock_frontend_dir):
     import asyncio
-    with tempfile.TemporaryDirectory() as tmpdir:
-        frontend_dir = os.path.join(tmpdir, "frontend")
-        os.makedirs(frontend_dir)
-        with open(os.path.join(frontend_dir, "index.html"), "w") as f:
-            f.write("hello")
+    tmpdir = str(mock_frontend_dir.parent)
 
-        with open(os.path.join(tmpdir, "frontend-secret.txt"), "w") as f:
-            f.write("secret")
+    with open(os.path.join(tmpdir, "frontend-secret.txt"), "w") as f:
+        f.write("secret")
 
-        real_abspath = os.path.abspath
-        def mock_abspath(path):
-            if path.endswith("main.py"):
-                return os.path.join(tmpdir, "main.py")
-            return real_abspath(path)
+    real_abspath = os.path.abspath
+    def mock_abspath(path):
+        if path.endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_abspath(path)
 
-        with patch("os.path.abspath", side_effect=mock_abspath):
-            with patch("main.AGENT_DIR", tmpdir):
-                with patch.dict(os.environ, {"API_KEY": "supersecret"}):
-                    _, main = setup_test_client()
+    with patch("os.path.abspath", side_effect=mock_abspath):
+        with patch("main.AGENT_DIR", tmpdir):
+            with patch.dict(os.environ, {"API_KEY": "supersecret"}):
+                _, main = setup_test_client()
 
-                    from fastapi import Request
+                from fastapi import Request
 
-                    async def mock_call_next(request):
-                        class MockResponse:
-                            status_code = 200
-                        return MockResponse()
+                async def mock_call_next(request):
+                    class MockResponse:
+                        status_code = 200
+                    return MockResponse()
 
-                    # URL encoded path traversal
-                    scope = {
-                        "type": "http",
-                        "method": "GET",
-                        "url": "http://testserver/%2E%2E%2Ffrontend-secret.txt",
-                        "path": "%2E%2E%2Ffrontend-secret.txt",
-                        "headers": []
-                    }
+                # URL encoded path traversal
+                scope = {
+                    "type": "http",
+                    "method": "GET",
+                    "url": "http://testserver/%2E%2E%2Ffrontend-secret.txt",
+                    "path": "%2E%2E%2Ffrontend-secret.txt",
+                    "headers": []
+                }
 
-                    request = Request(scope)
+                request = Request(scope)
 
-                    response = asyncio.run(main.verify_api_key(request, mock_call_next))
+                response = asyncio.run(main.verify_api_key(request, mock_call_next))
 
-                    # Before the fix, this bypassed auth check and returned 200 from mock_call_next
-                    # After the fix, it should return 401 Unauthorized
-                    assert response.status_code == 401
+                # Before the fix, this bypassed auth check and returned 200 from mock_call_next
+                # After the fix, it should return 401 Unauthorized
+                assert response.status_code == 401
 
 
 @patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://custom-origin.example.com, http://localhost:3000 "})
@@ -220,32 +219,26 @@ def test_default_cors_origins():
 
     assert main.allow_origins == []
 
-def test_static_file_auth_bypass_success():
-    import main
+def test_static_file_auth_bypass_success(mock_frontend_dir):
     import uuid
-    import shutil
-
-    frontend_dir = os.path.join(main.AGENT_DIR, "frontend")
-    frontend_created = False
-    if not os.path.exists(frontend_dir):
-        os.makedirs(frontend_dir)
-        frontend_created = True
-
+    tmpdir = str(mock_frontend_dir.parent)
     test_filename = f"test_bypass_{uuid.uuid4().hex}.html"
-    test_filepath = os.path.join(frontend_dir, test_filename)
+    test_filepath = os.path.join(str(mock_frontend_dir), test_filename)
 
-    try:
-        with open(test_filepath, "w") as f:
-            f.write("<html><body>Bypass Test</body></html>")
+    with open(test_filepath, "w") as f:
+        f.write("<html><body>Bypass Test</body></html>")
 
-        with patch.dict(os.environ, {"API_KEY": "supersecret"}):
-            client = TestClient(main.app)
-            response = client.get(f"/{test_filename}")
+    real_abspath = os.path.abspath
+    def mock_abspath(path):
+        if path.endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_abspath(path)
 
-            assert response.status_code == 200
-            assert "Bypass Test" in response.text
-    finally:
-        if os.path.exists(test_filepath):
-            os.remove(test_filepath)
-        if frontend_created and os.path.exists(frontend_dir):
-            shutil.rmtree(frontend_dir)
+    with patch("os.path.abspath", side_effect=mock_abspath):
+        with patch("main.AGENT_DIR", tmpdir):
+            with patch.dict(os.environ, {"API_KEY": "supersecret"}):
+                client, main = setup_test_client()
+                response = client.get(f"/{test_filename}")
+
+                assert response.status_code == 200
+                assert "Bypass Test" in response.text
