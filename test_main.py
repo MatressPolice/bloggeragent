@@ -3,10 +3,13 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 import tempfile
+import asyncio
+import importlib
+import shutil
+import uuid
+import main
 
 def setup_test_client():
-    import main
-    import importlib
     importlib.reload(main)
     return TestClient(main.app), main
 
@@ -112,10 +115,16 @@ def test_auth_middleware_with_invalid_header_format():
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
 
+    # Empty token ("Bearer " without token)
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "Bearer "}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
 @patch.dict(os.environ, {"API_KEY": "supersecret", "ALLOWED_ORIGINS": "http://localhost:8080"})
 def test_auth_middleware_options_preflight():
-    import main
-    import importlib
     importlib.reload(main)
     client = TestClient(main.app)
 
@@ -150,8 +159,6 @@ def test_auth_middleware_bypass_attempts():
         assert response.json()["detail"] == "Unauthorized"
 
 def test_auth_middleware_path_traversal_static():
-    import tempfile
-    import asyncio
     with tempfile.TemporaryDirectory() as tmpdir:
         frontend_dir = os.path.join(tmpdir, "frontend")
         os.makedirs(frontend_dir)
@@ -221,10 +228,6 @@ def test_default_cors_origins():
     assert main.allow_origins == []
 
 def test_static_file_auth_bypass_success():
-    import main
-    import uuid
-    import shutil
-
     frontend_dir = os.path.join(main.AGENT_DIR, "frontend")
     frontend_created = False
     if not os.path.exists(frontend_dir):
