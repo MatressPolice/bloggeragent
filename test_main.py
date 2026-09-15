@@ -174,34 +174,34 @@ def test_auth_middleware_path_traversal_static():
                 return os.path.join(tmpdir, "main.py")
             return real_abspath(path)
 
-        with patch("os.path.abspath", side_effect=mock_abspath):
-            with patch("main.AGENT_DIR", tmpdir):
-                with patch.dict(os.environ, {"API_KEY": "supersecret"}):
-                    _, main = setup_test_client()
+        with patch("os.path.abspath", side_effect=mock_abspath), \
+             patch("main.AGENT_DIR", tmpdir), \
+             patch.dict(os.environ, {"API_KEY": "supersecret"}):
+            _, main = setup_test_client()
 
-                    from fastapi import Request
+            from fastapi import Request
 
-                    async def mock_call_next(request):
-                        class MockResponse:
-                            status_code = 200
-                        return MockResponse()
+            async def mock_call_next(request):
+                class MockResponse:
+                    status_code = 200
+                return MockResponse()
 
-                    # URL encoded path traversal
-                    scope = {
-                        "type": "http",
-                        "method": "GET",
-                        "url": "http://testserver/%2E%2E%2Ffrontend-secret.txt",
-                        "path": "%2E%2E%2Ffrontend-secret.txt",
-                        "headers": []
-                    }
+            # URL encoded path traversal
+            scope = {
+                "type": "http",
+                "method": "GET",
+                "url": "http://testserver/%2E%2E%2Ffrontend-secret.txt",
+                "path": "%2E%2E%2Ffrontend-secret.txt",
+                "headers": []
+            }
 
-                    request = Request(scope)
+            request = Request(scope)
 
-                    response = asyncio.run(main.verify_api_key(request, mock_call_next))
+            response = asyncio.run(main.verify_api_key(request, mock_call_next))
 
-                    # Before the fix, this bypassed auth check and returned 200 from mock_call_next
-                    # After the fix, it should return 401 Unauthorized
-                    assert response.status_code == 401
+            # Before the fix, this bypassed auth check and returned 200 from mock_call_next
+            # After the fix, it should return 401 Unauthorized
+            assert response.status_code == 401
 
 
 @patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://custom-origin.example.com, http://localhost:3000 "})
