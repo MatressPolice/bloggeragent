@@ -109,6 +109,22 @@ def test_auth_middleware_with_invalid_header_format():
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
 
+    # Empty string
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": ""}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
+    # Missing space
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "Bearer"}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
     # Missing prefix entirely
     response = client.get(
         "/list-apps",
