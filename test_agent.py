@@ -134,46 +134,53 @@ def test_root_agent_integration(mock_agent_call):
     assert root_agent.tools[0].name == "RobustBlogPlanner"
     assert root_agent.tools[1].name == "RobustBlogWriter"
 
-def test_robust_blog_planner_integration_retry_loop():
-    async def _test():
-        with patch("google.adk.agents.llm_agent.LlmAgent.run_async") as mock_agent_run:
-            async def mock_run_1(*args, **kwargs):
-                yield Event(output={"blog_outline": "Attempt 1"})
+def test_robust_blog_planner_integration():
+    from google.adk.runners import Runner
+    from google.adk.sessions import InMemorySessionService
+    from google.adk.agents.base_agent import Event
+    from google.adk.events.event_actions import EventActions
+    from google.genai.types import Content, Part
 
-            async def mock_run_2(*args, **kwargs):
-                yield Event(output={"validation_result": "retry"})
+    with patch.object(robust_blog_planner.sub_agents[0], "_run_async_impl") as mock_planner, \
+         patch.object(robust_blog_planner.sub_agents[1], "_run_async_impl") as mock_validator:
 
-            async def mock_run_3(*args, **kwargs):
-                yield Event(output={"blog_outline": "Attempt 2"})
+        async def mock_planner_1(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="First outline")]), actions=EventActions(state_delta={"blog_outline": "First outline"}))
 
-            async def mock_run_4(*args, **kwargs):
-                yield Event(output={"validation_result": "ok"}, actions=EventActions(escalate=True))
+        async def mock_planner_2(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="Second outline")]), actions=EventActions(state_delta={"blog_outline": "Second outline"}))
 
-            mock_agent_run.side_effect = [
-                mock_run_1(),
-                mock_run_2(),
-                mock_run_3(),
-                mock_run_4()
-            ]
+        async def mock_validator_1(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="retry")]), actions=EventActions(state_delta={"validation_result": "retry"}))
 
-            session = Session(id="test_session", appName="test_app", userId="test_user")
+        async def mock_validator_2(*args, **kwargs):
+            yield Event(content=Content(parts=[Part.from_text(text="ok")]), actions=EventActions(state_delta={"validation_result": "ok"}, escalate=True))
+
+        mock_planner.side_effect = [mock_planner_1(), mock_planner_2()]
+        mock_validator.side_effect = [mock_validator_1(), mock_validator_2()]
+
+        async def run_test():
             session_service = InMemorySessionService()
-            rc = RunConfig()
-            inv_ctx = InvocationContext(
-                agent=root_agent.tools[0].agent,
-                session=session,
-                session_service=session_service,
-                invocation_id="123",
-                run_config=rc
-            )
+            session = await session_service.create_session(app_name="test_app", user_id="user1")
+            runner = Runner(app_name="test_app", agent=robust_blog_planner, session_service=session_service)
 
-            tool_ctx = ToolContext(invocation_context=inv_ctx)
+            request_input = {"topic": "My topic"}
 
-            events = []
-            async for e in root_agent.tools[0].agent._run_async_impl(tool_ctx.get_invocation_context()):
-                events.append(e)
+            try:
+                async for _ in runner.run_async(
+                    user_id="user1",
+                    session_id=session.id,
+                    state_delta=request_input,
+                    new_message=Content(parts=[Part.from_text(text="Start")])
+                ):
+                    pass
+            except RuntimeError:
+                pass
 
-            assert len(events) == 4
-            assert mock_agent_run.call_count == 4
+            assert mock_planner.call_count == 2
+            assert mock_validator.call_count == 2
+            final_state = await session_service.get_session(app_name="test_app", user_id="user1", session_id=session.id)
+            assert final_state.state.get("validation_result") == "ok"
+            assert final_state.state.get("blog_outline") == "Second outline"
 
-    asyncio.run(_test())
+        asyncio.run(run_test())
