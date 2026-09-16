@@ -250,3 +250,20 @@ def test_static_file_auth_bypass_success(mock_frontend_dir):
 
         assert response.status_code == 200
         assert "Bypass Test" in response.text
+
+@patch('os.getenv')
+def test_verify_api_key_no_getenv_calls(mock_getenv):
+    # Verify that os.getenv is not called during request processing,
+    # ensuring the redundant environment variable read in middleware is resolved.
+    client, _ = setup_test_client(reload=False)
+
+    # We must patch API_KEY for authentication bypass, but we are testing os.getenv
+    with patch('main.API_KEY', 'supersecret'):
+        response = client.get(
+            "/list-apps",
+            headers={"Authorization": "Bearer supersecret"}
+        )
+        assert response.status_code == 200
+
+    # Assert os.getenv was not called during the request
+    mock_getenv.assert_not_called()
