@@ -250,3 +250,35 @@ def test_static_file_auth_bypass_success(mock_frontend_dir):
 
         assert response.status_code == 200
         assert "Bypass Test" in response.text
+
+def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
+    tmpdir = str(mock_frontend_dir.parent)
+    test_filename = f"test_perf_{uuid.uuid4().hex}.html"
+    test_filepath = os.path.join(str(mock_frontend_dir), test_filename)
+
+    with open(test_filepath, "w") as f:
+        f.write("<html><body>Perf Test</body></html>")
+
+    real_abspath = os.path.abspath
+    def mock_abspath(path):
+        if path.endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_abspath(path)
+
+    with patch("os.path.abspath", side_effect=mock_abspath), \
+         patch("main.AGENT_DIR", tmpdir), \
+         patch.dict(os.environ, {"API_KEY": "supersecret"}), \
+         patch("main.API_KEY", "supersecret"):
+        client, main_mod = setup_test_client(reload=True)
+
+        # We patch os.path.isdir but we shouldn't patch it directly on main
+        # since main calls asyncio.to_thread which uses the real os.path.isdir
+        # Let's patch os.path.isdir and see if it gets called during the request
+        with patch("os.path.isdir") as mock_isdir:
+            response = client.get(f"/{test_filename}")
+
+            assert response.status_code == 200
+            assert "Perf Test" in response.text
+            # The optimization: isdir should not be called per request in middleware
+            # it should be cached during init.
+            mock_isdir.assert_not_called()
