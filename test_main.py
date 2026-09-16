@@ -174,10 +174,12 @@ def test_auth_middleware_path_traversal_static(mock_frontend_dir):
             return os.path.join(tmpdir, "main.py")
         return real_abspath(path)
 
-    with patch("os.path.abspath", side_effect=mock_abspath), \
-         patch("main.AGENT_DIR", tmpdir), \
-         patch.dict(os.environ, {"API_KEY": "supersecret"}), \
-         patch("main.API_KEY", "supersecret"):
+    with (
+        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
         _, main_mod = setup_test_client(reload=True)
 
         from fastapi import Request
@@ -241,10 +243,12 @@ def test_static_file_auth_bypass_success(mock_frontend_dir):
             return os.path.join(tmpdir, "main.py")
         return real_abspath(path)
 
-    with patch("os.path.abspath", side_effect=mock_abspath), \
-         patch("main.AGENT_DIR", tmpdir), \
-         patch.dict(os.environ, {"API_KEY": "supersecret"}), \
-         patch("main.API_KEY", "supersecret"):
+    with (
+        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
         client, main_mod = setup_test_client(reload=True)
         response = client.get(f"/{test_filename}")
 
