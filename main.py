@@ -31,6 +31,8 @@ app = get_fast_api_app(
 # Public endpoints that do not require authentication
 PUBLIC_PATHS = {"/", "/docs", "/openapi.json", "/redoc", "/health", "/version"}
 
+_static_file_cache = {}
+
 @app.middleware("http")
 async def verify_api_key(request: Request, call_next):
     # Allow OPTIONS preflight requests to pass through
@@ -48,8 +50,16 @@ async def verify_api_key(request: Request, call_next):
     # Check if it's a valid static file in the frontend directory
     if FRONTEND_DIR_EXISTS:
         file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-        if os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path):
-            return await call_next(request)
+        if os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX):
+            is_file = _static_file_cache.get(file_path)
+            if is_file is None:
+                is_file = await asyncio.to_thread(os.path.isfile, file_path)
+                if len(_static_file_cache) > 1024:
+                    _static_file_cache.clear()
+                _static_file_cache[file_path] = is_file
+
+            if is_file:
+                return await call_next(request)
 
     # Anything else requires authentication (default-deny policy)
 
