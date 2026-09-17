@@ -6,6 +6,7 @@ from urllib.parse import unquote
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.gzip import GZipMiddleware
 from google.adk.cli.fast_api import get_fast_api_app
 
 API_KEY = os.getenv("API_KEY")
@@ -27,6 +28,11 @@ app = get_fast_api_app(
     web=False,
     allow_origins=allow_origins
 )
+
+# ⚡ Bolt Optimization: GZipMiddleware compresses responses larger than 1KB,
+# significantly reducing the payload size of static assets like the 45KB index.html
+# and resulting in faster initial page loads and reduced bandwidth consumption.
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Public endpoints that do not require authentication
 PUBLIC_PATHS = {"/", "/docs", "/openapi.json", "/redoc", "/health", "/version"}
