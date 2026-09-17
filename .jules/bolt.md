@@ -9,3 +9,7 @@
 ## 2026-09-16 - Removed redundant isdir check in middleware
 **Learning:** Checking `os.path.isdir` during request handling introduces unnecessary I/O and asynchronous thread dispatch overhead (`await asyncio.to_thread`) for a directory structure that is static during application runtime. In local benchmarking, caching this value improved static file middleware routing times by ~52% (from 4.81s to 2.31s per 10k requests).
 **Action:** When writing middleware or high-frequency request handlers, calculate and cache static directory existences and paths at the module/initialization level instead of inside the request loop.
+
+## 2026-09-17 - Added GZipMiddleware for static payloads
+**Learning:** Large frontend payloads (like the 45KB index.html) served directly from the FastAPI application using StaticFiles are not compressed by default. Adding `GZipMiddleware` allows the application to compress these payloads, reducing memory/bandwidth overhead for clients without needing to configure an external reverse proxy for local testing or simple containerized deployments.
+**Action:** When an ASGI application serves moderately large text-based assets directly, evaluate adding built-in compression middleware (like `fastapi.middleware.gzip.GZipMiddleware`) to automatically reduce the payload size if no reverse proxy is handling it.
