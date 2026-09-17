@@ -247,8 +247,6 @@ def test_default_cors_origins():
 
 def test_frontend_dir_abspath_prefix_performance_optimization():
     """Verify that the module-level FRONTEND_DIR_ABSPATH_PREFIX optimization is in place."""
-    import main
-    import os
     expected_prefix = os.path.abspath(main.FRONTEND_DIR) + os.path.sep
     assert main.FRONTEND_DIR_ABSPATH_PREFIX == expected_prefix, (
         "FRONTEND_DIR_ABSPATH_PREFIX must be calculated at module level "
