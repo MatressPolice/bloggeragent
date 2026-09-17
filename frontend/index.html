@@ -931,7 +931,7 @@
     <div class="input-card glass-card">
       <form id="generateForm" class="input-group">
         <input type="text" id="topicInput" class="topic-input" placeholder="e.g. Kubernetes autoscaling best practices"
-          required autocomplete="off" aria-label="Blog topic" />
+          required autocomplete="off" aria-label="Blog topic" maxlength="200" />
         <button type="submit" id="generateBtn" class="generate-btn">
           <span class="btn-icon">✦</span>
           <span class="btn-text">Generate<span id="btnShortcut" class="btn-shortcut"></span></span>
@@ -1349,6 +1349,10 @@
       if (isGenerating) return;
       const topic = topicInput.value.trim();
       if (!topic) return;
+      if (topic.length > 200) {
+        showError("Topic is too long. Please limit it to 200 characters.");
+        return;
+      }
       generateArticle(topic);
     });
 
