@@ -31,6 +31,19 @@ app = get_fast_api_app(
 # Public endpoints that do not require authentication
 PUBLIC_PATHS = {"/", "/docs", "/openapi.json", "/redoc", "/health", "/version"}
 
+# Cache for static file validation to avoid thread dispatch and disk I/O overhead
+_STATIC_CACHE = {}
+_MAX_CACHE_SIZE = 1000
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
 @app.middleware("http")
 async def verify_api_key(request: Request, call_next):
     # Allow OPTIONS preflight requests to pass through
@@ -47,8 +60,16 @@ async def verify_api_key(request: Request, call_next):
 
     # Check if it's a valid static file in the frontend directory
     if FRONTEND_DIR_EXISTS:
-        file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-        if os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path):
+        is_static = _STATIC_CACHE.get(norm_path)
+        if is_static is None:
+            file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
+            is_static = os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
+
+            if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
+                _STATIC_CACHE.clear()
+            _STATIC_CACHE[norm_path] = is_static
+
+        if is_static:
             return await call_next(request)
 
     # Anything else requires authentication (default-deny policy)
