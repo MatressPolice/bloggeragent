@@ -1352,11 +1352,15 @@
       generateArticle(topic);
     });
 
-    // Allow Ctrl+Enter to submit (global scope to make it fully intuitive)
+    // Allow Ctrl+Enter to submit from anywhere on the page (global scope to make it fully intuitive)
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
-        form.dispatchEvent(new Event("submit"));
+        if (topicInput.value.trim()) {
+          form.dispatchEvent(new Event("submit"));
+        } else {
+          topicInput.focus();
+        }
       }
     });
 
