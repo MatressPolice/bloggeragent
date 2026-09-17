@@ -109,6 +109,22 @@ def test_auth_middleware_with_invalid_header_format():
     assert response.status_code == 401
     assert response.json()["detail"] == "Unauthorized"
 
+    # Empty string
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": ""}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
+    # Missing space
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "Bearer"}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
     # Missing prefix entirely
     response = client.get(
         "/list-apps",
@@ -254,3 +270,58 @@ def test_static_file_auth_bypass_success(mock_frontend_dir):
 
         assert response.status_code == 200
         assert "Bypass Test" in response.text
+
+def test_security_headers():
+    client, _ = setup_test_client(reload=True)
+    response = client.get("/")
+    assert response.headers.get("X-Content-Type-Options") == "nosniff"
+    assert response.headers.get("X-Frame-Options") == "DENY"
+    assert response.headers.get("X-XSS-Protection") == "1; mode=block"
+    assert response.headers.get("Strict-Transport-Security") == "max-age=31536000; includeSubDomains"
+
+@patch('os.getenv')
+def test_verify_api_key_no_getenv_calls(mock_getenv):
+    # Verify that os.getenv is not called during request processing,
+    # ensuring the redundant environment variable read in middleware is resolved.
+    client, _ = setup_test_client(reload=False)
+
+    # We must patch API_KEY for authentication bypass, but we are testing os.getenv
+    with patch('main.API_KEY', 'supersecret'):
+        response = client.get(
+            "/list-apps",
+            headers={"Authorization": "Bearer supersecret"}
+        )
+        assert response.status_code == 200
+
+    # Assert os.getenv was not called during the request
+    mock_getenv.assert_not_called()
+
+def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
+    tmpdir = str(mock_frontend_dir.parent)
+    test_filename = f"test_perf_{uuid.uuid4().hex}.html"
+    test_filepath = os.path.join(str(mock_frontend_dir), test_filename)
+
+    with open(test_filepath, "w") as f:
+        f.write("<html><body>Perf Test</body></html>")
+
+    real_abspath = os.path.abspath
+    def mock_abspath(path):
+        if path.endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_abspath(path)
+
+    with patch("os.path.abspath", side_effect=mock_abspath), \
+         patch("main.AGENT_DIR", tmpdir), \
+         patch.dict(os.environ, {"API_KEY": "supersecret"}), \
+         patch("main.API_KEY", "supersecret"):
+        client, main_mod = setup_test_client(reload=True)
+
+        with patch("os.path.isdir") as mock_isdir:
+            response = client.get(f"/{test_filename}")
+
+            assert response.status_code == 200
+            assert "Perf Test" in response.text
+            # The optimization: isdir should not be called per request in middleware
+            # it should be cached during init.
+            mock_isdir.assert_not_called()
+
