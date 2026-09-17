@@ -190,10 +190,12 @@ def test_auth_middleware_path_traversal_static(mock_frontend_dir):
             return os.path.join(tmpdir, "main.py")
         return real_abspath(path)
 
-    with patch("os.path.abspath", side_effect=mock_abspath), \
-         patch("main.AGENT_DIR", tmpdir), \
-         patch.dict(os.environ, {"API_KEY": "supersecret"}), \
-         patch("main.API_KEY", "supersecret"):
+    with (
+        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
         _, main_mod = setup_test_client(reload=True)
 
         from fastapi import Request
@@ -257,10 +259,12 @@ def test_static_file_auth_bypass_success(mock_frontend_dir):
             return os.path.join(tmpdir, "main.py")
         return real_abspath(path)
 
-    with patch("os.path.abspath", side_effect=mock_abspath), \
-         patch("main.AGENT_DIR", tmpdir), \
-         patch.dict(os.environ, {"API_KEY": "supersecret"}), \
-         patch("main.API_KEY", "supersecret"):
+    with (
+        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
         client, main_mod = setup_test_client(reload=True)
         response = client.get(f"/{test_filename}")
 
@@ -306,18 +310,21 @@ def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
             return os.path.join(tmpdir, "main.py")
         return real_abspath(path)
 
-    with patch("os.path.abspath", side_effect=mock_abspath), \
-         patch("main.AGENT_DIR", tmpdir), \
-         patch.dict(os.environ, {"API_KEY": "supersecret"}), \
-         patch("main.API_KEY", "supersecret"):
+    with (
+        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret"),
+        patch("os.path.isdir", return_value=True) as mock_isdir
+    ):
         client, main_mod = setup_test_client(reload=True)
+        mock_isdir.reset_mock()
 
-        with patch("os.path.isdir") as mock_isdir:
-            response = client.get(f"/{test_filename}")
+        response = client.get(f"/{test_filename}")
 
-            assert response.status_code == 200
-            assert "Perf Test" in response.text
-            # The optimization: isdir should not be called per request in middleware
-            # it should be cached during init.
-            mock_isdir.assert_not_called()
+        assert response.status_code == 200
+        assert "Perf Test" in response.text
+        # The optimization: isdir should not be called per request in middleware
+        # it should be cached during init.
+        mock_isdir.assert_not_called()
 
