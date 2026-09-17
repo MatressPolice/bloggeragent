@@ -287,6 +287,12 @@ def test_security_headers():
     assert response.headers.get("X-XSS-Protection") == "1; mode=block"
     assert response.headers.get("Strict-Transport-Security") == "max-age=31536000; includeSubDomains"
 
+def test_gzip_compression():
+    client, _ = setup_test_client(reload=True)
+    response = client.get("/", headers={"Accept-Encoding": "gzip"})
+    assert response.status_code == 200
+    assert response.headers.get("content-encoding") == "gzip"
+
 @patch('os.getenv')
 def test_verify_api_key_no_getenv_calls(mock_getenv):
     # Verify that os.getenv is not called during request processing,
