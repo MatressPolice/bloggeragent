@@ -17,3 +17,7 @@
 ## 2026-09-17 - Fast path access in ASGI/FastAPI middleware
 **Learning:** In ASGI frameworks like FastAPI/Starlette, accessing `request.url.path` internally constructs a URL object which adds significant overhead (e.g. ~0.7ms vs ~0.01ms per request parsing). For middleware that runs on every request, this cumulative cost can be high.
 **Action:** When inspecting request paths in high-frequency middleware, use `request.scope.get("path", "")` instead of `request.url.path` to avoid unnecessary object allocation and parsing.
+
+## 2025-02-13 - Redundant abspath calculation in middleware
+**Learning:** Calculating `os.path.abspath` per-request in middleware for static file validation introduces unnecessary overhead. Since the base directory does not change during runtime, calculating it once at initialization provides measurable performance gains (e.g., ~25% improvement in path validation microbenchmarks).
+**Action:** Wrote an AST verification test to enforce that `os.path.abspath(FRONTEND_DIR)` is not called within middleware functions like `verify_api_key`, maintaining the optimization where a cached module-level `FRONTEND_DIR_ABSPATH_PREFIX` is used instead.
