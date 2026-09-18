@@ -59,3 +59,21 @@ def test_no_redundant_abspath_in_middleware():
     visitor = RedundantAbspathVisitor()
     visitor.visit(tree)
     assert not visitor.violations, f"Found redundant os.path.abspath(FRONTEND_DIR) calls in middleware at lines: {visitor.violations}"
+
+def test_robust_blog_writer_integration_exists():
+    filepath = "test_agent.py"
+    with open(filepath, "r") as f:
+        tree = ast.parse(f.read(), filename=filepath)
+
+    class FunctionVisitor(ast.NodeVisitor):
+        def __init__(self):
+            self.found = False
+
+        def visit_FunctionDef(self, node):
+            if node.name == "test_robust_blog_writer_integration":
+                self.found = True
+            self.generic_visit(node)
+
+    visitor = FunctionVisitor()
+    visitor.visit(tree)
+    assert visitor.found, "test_robust_blog_writer_integration is missing from test_agent.py"
