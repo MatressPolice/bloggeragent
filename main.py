@@ -56,7 +56,9 @@ async def verify_api_key(request: Request, call_next):
     if request.method == "OPTIONS":
         return await call_next(request)
 
-    norm_path = posixpath.normpath(unquote(request.url.path))
+    # ⚡ Bolt Optimization: Use request.scope.get("path") instead of request.url.path
+    # to avoid the overhead of constructing a URL object and parsing it on every request.
+    norm_path = posixpath.normpath(unquote(request.scope.get("path", "")))
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
 
