@@ -51,8 +51,6 @@ def test_no_frontend_endpoint():
         data = response.json()
         assert "detail" in data
         assert data["detail"] == "frontend dir not found"
-        assert "cwd" in data
-        assert "files" in data
 
 def test_auth_middleware_no_key_configured():
     # If API_KEY is not set, API should deny access by default (secure by default)

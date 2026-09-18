@@ -105,4 +105,4 @@ if FRONTEND_DIR_EXISTS:
 else:
     @app.get("/")
     def no_frontend():
-        return {"detail": "frontend dir not found", "cwd": os.getcwd(), "files": os.listdir(AGENT_DIR)}
+        return {"detail": "frontend dir not found"}
