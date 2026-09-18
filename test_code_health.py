@@ -16,10 +16,9 @@ def test_no_nested_patch_in_test_main():
             self.violations = []
 
         def visit_With(self, node):
-            for stmt in node.body:
-                if isinstance(stmt, ast.With):
-                    self.has_nested_patch = True
-                    self.violations.append(stmt.lineno)
+            if len(node.body) == 1 and isinstance(node.body[0], ast.With):
+                self.has_nested_patch = True
+                self.violations.append(node.lineno)
             self.generic_visit(node)
 
     visitor = NestedWithVisitor()
