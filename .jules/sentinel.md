@@ -7,3 +7,8 @@
 **Vulnerability:** The `#topicInput` field in the frontend application lacked a length restriction, making it possible to submit excessively large strings which could cause DoS (Denial of Service) conditions by overwhelming backend processing or LLM token capacities.
 **Learning:** Even client-facing forms in low-stakes applications need strictly bounded input parameters to guarantee stable resource utilization.
 **Prevention:** Always define a `maxlength` HTML attribute on text inputs and enforce identical bounds within JavaScript form submission handlers as a defense-in-depth measure.
+
+## 2026-09-18 - [Fix information disclosure in fallback endpoint]
+**Vulnerability:** The `no_frontend` fallback endpoint returned `cwd` and `files` which exposed internal server directory structures (`os.getcwd()` and `os.listdir(AGENT_DIR)`). This kind of information leakage can aid attackers in reconnaissance and path traversal exploits.
+**Learning:** Fallback endpoints or debug messages left in production can easily leak sensitive internal details (like file paths and directory listings) to unauthorized users.
+**Prevention:** Avoid returning internal filesystem paths, directory structures, or detailed stack traces in API responses, especially in default or fallback endpoints.
