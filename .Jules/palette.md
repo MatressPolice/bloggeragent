@@ -12,3 +12,7 @@
 ## 2026-09-18 - Autofocus on Primary Input
 **Learning:** Automatically focusing the primary input field on a single-purpose page reduces friction and improves the overall user experience.
 **Action:** Use the `autofocus` HTML attribute on primary input fields where the immediate user action is expected to be text entry.
+
+## 2024-09-20 - Ensure Stepper Elements Use Standard List Semantics and Avoid Decorative Redundancy
+**Learning:** Purely visual step counters (e.g. 1, 2, 3) in a stepper create redundant readouts for screen reader users when semantic list roles (like `role="list"` and `role="listitem"`) are already in use, since screen readers natively announce the index of a list item. Additionally, emoji icons used decoratively throughout UI components without an `aria-hidden="true"` attribute cause unhelpful, verbose interruptions for users with assistive tech.
+**Action:** Always map progress steppers to native `role="list"` structures, actively hide the numeric visual indicator with `aria-hidden="true"`, and use `aria-current="step"` to designate the active step. Enforce `aria-hidden="true"` for all decorative emojis to maintain a clean accessibility tree.
