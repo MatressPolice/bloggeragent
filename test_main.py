@@ -38,6 +38,14 @@ def test_frontend_static_mount(mock_frontend_dir):
         assert response.status_code == 200
         assert "Mocked Frontend" in response.text
 
+def test_security_headers_csp():
+    client, _ = setup_test_client(reload=True)
+    # Patch API_KEY to bypass authentication and hit the health endpoint
+    with patch("main.API_KEY", "supersecret"):
+        response = client.get("/health", headers={"Authorization": "Bearer supersecret"})
+        assert "content-security-policy" in response.headers
+        assert response.headers["content-security-policy"] == "default-src 'self'"
+
 def test_no_frontend_endpoint():
     # Mock os.path.isdir to return False for the frontend directory
     # so that the fallback endpoint is registered instead of the static mount.
