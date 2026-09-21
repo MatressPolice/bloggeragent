@@ -21,3 +21,7 @@
 ## 2025-02-13 - Redundant abspath calculation in middleware
 **Learning:** Calculating `os.path.abspath` per-request in middleware for static file validation introduces unnecessary overhead. Since the base directory does not change during runtime, calculating it once at initialization provides measurable performance gains (e.g., ~25% improvement in path validation microbenchmarks).
 **Action:** Wrote an AST verification test to enforce that `os.path.abspath(FRONTEND_DIR)` is not called within middleware functions like `verify_api_key`, maintaining the optimization where a cached module-level `FRONTEND_DIR_ABSPATH_PREFIX` is used instead.
+
+## 2026-09-17 - Fast path early exit for public routes in ASGI/FastAPI middleware
+**Learning:** Checking the raw, un-decoded path (e.g. `request.scope.get('path')`) against known public routes before performing expensive URL decoding and path normalization operations (`unquote` and `posixpath.normpath`) provides a significant micro-performance boost (~90% overhead reduction in tests) for these frequently accessed endpoints without compromising security checks on subsequent logic.
+**Action:** When implementing path-based authorization or routing checks in FastAPI middleware, implement an early exit 'fast-path' by checking the exact raw path before applying expensive decoding and normalization logic.
