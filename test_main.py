@@ -284,6 +284,7 @@ def test_security_headers():
     assert response.headers.get("X-Frame-Options") == "DENY"
     assert response.headers.get("X-XSS-Protection") == "1; mode=block"
     assert response.headers.get("Strict-Transport-Security") == "max-age=31536000; includeSubDomains"
+    assert "Content-Security-Policy" in response.headers
 
 def test_gzip_compression():
     client, _ = setup_test_client(reload=True)
