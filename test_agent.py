@@ -5,7 +5,6 @@ from google.adk.events.event import Event
 from google.adk.events.event_actions import EventActions
 from google.adk.tools.tool_context import ToolContext
 from google.adk.agents.invocation_context import InvocationContext
-from google.adk.sessions.session import Session
 from google.adk.sessions.in_memory_session_service import InMemorySessionService
 from google.adk.agents.run_config import RunConfig
 from agent import (
