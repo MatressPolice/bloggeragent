@@ -12,3 +12,7 @@
 **Vulnerability:** The `no_frontend` fallback endpoint returned `cwd` and `files` which exposed internal server directory structures (`os.getcwd()` and `os.listdir(AGENT_DIR)`). This kind of information leakage can aid attackers in reconnaissance and path traversal exploits.
 **Learning:** Fallback endpoints or debug messages left in production can easily leak sensitive internal details (like file paths and directory listings) to unauthorized users.
 **Prevention:** Avoid returning internal filesystem paths, directory structures, or detailed stack traces in API responses, especially in default or fallback endpoints.
+## 2023-10-24 - [HIGH] Fix authentication bypass in middleware
+**Vulnerability:** The FastAPI middleware used `posixpath.normpath(unquote(request.scope.get("path", "")))` for route validation, allowing URL-encoded path traversal (e.g., `/protected%2f..%2fhealth`) to bypass authentication checks by masquerading as public endpoints like `/health`.
+**Learning:** The ASGI router processes raw paths differently, preserving URL-encoded characters. Attempting to normalize the path in middleware creates a mismatch with the application router's path resolution, leading to bypass vulnerabilities.
+**Prevention:** Always validate using the exact same raw path representation that the ASGI application router receives (`request.scope.get('path', '')`) directly, without custom decoding or normalization.
