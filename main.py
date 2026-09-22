@@ -1,8 +1,6 @@
 import os
 import asyncio
 import secrets
-import posixpath
-from urllib.parse import unquote
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -58,9 +56,7 @@ async def verify_api_key(request: Request, call_next):
 
     # ⚡ Bolt Optimization: Use request.scope.get("path") instead of request.url.path
     # to avoid the overhead of constructing a URL object and parsing it on every request.
-    norm_path = posixpath.normpath(unquote(request.scope.get("path", "")))
-    if norm_path.startswith("//"):
-        norm_path = "/" + norm_path.lstrip("/")
+    norm_path = request.scope.get("path", "")
 
     # If this route is meant to be public, skip auth
     if norm_path in PUBLIC_PATHS:
