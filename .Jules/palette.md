@@ -12,3 +12,6 @@
 ## 2026-09-18 - Autofocus on Primary Input
 **Learning:** Automatically focusing the primary input field on a single-purpose page reduces friction and improves the overall user experience.
 **Action:** Use the `autofocus` HTML attribute on primary input fields where the immediate user action is expected to be text entry.
+## 2024-09-20 - Screen Reader Semantics for Steppers and Icons
+**Learning:** Purely decorative emojis and visual icons can clutter screen reader output, creating a frustrating experience. Similarly, visual "steppers" (progress indicators) require explicit `role="list"`, `role="listitem"`, and `aria-current="step"` semantics to be properly understood as a sequential flow by assistive technologies.
+**Action:** Always wrap or assign `aria-hidden="true"` to purely decorative visual flair, and explicitly map custom visual progress indicators to their native semantic equivalents (lists with current step indicators) to ensure equitable accessibility.
