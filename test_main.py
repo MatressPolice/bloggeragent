@@ -47,10 +47,10 @@ def test_no_frontend_endpoint():
         client, _ = setup_test_client(reload=True)
         response = client.get("/")
         
-        assert response.status_code == 200
+        assert response.status_code == 404
         data = response.json()
         assert "detail" in data
-        assert data["detail"] == "frontend dir not found"
+        assert data["detail"] == "Not Found"
 
 def test_auth_middleware_no_key_configured():
     # If API_KEY is not set, API should deny access by default (secure by default)
@@ -58,7 +58,7 @@ def test_auth_middleware_no_key_configured():
         client, _ = setup_test_client(reload=False)
         response = client.get("/list-apps")
         assert response.status_code == 401
-        assert "API_KEY environment variable is not set" in response.json()["detail"]
+        assert "Unauthorized" in response.json()["detail"]
 
 @patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_key_unauthorized():
@@ -66,7 +66,13 @@ def test_auth_middleware_with_key_unauthorized():
 
     # Public endpoints should still be accessible
     for path in main_mod.PUBLIC_PATHS:
-        assert client.get(path).status_code == 200
+        # Since FRONTEND_DIR_EXISTS is false in standard test run, root will return 404 Not Found
+        # But for other public paths like /docs, they should return 200
+        response = client.get(path)
+        if path == "/":
+            assert response.status_code in (200, 404)
+        else:
+            assert response.status_code == 200
 
     # Protected endpoints should return 401
     response = client.get("/list-apps")
@@ -94,6 +100,7 @@ def test_auth_middleware_with_wrong_key():
         headers={"Authorization": "Bearer wrongkey"}
     )
     assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
 
 @patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_invalid_header_format():

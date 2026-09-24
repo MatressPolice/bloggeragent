@@ -12,3 +12,7 @@
 **Vulnerability:** The `no_frontend` fallback endpoint returned `cwd` and `files` which exposed internal server directory structures (`os.getcwd()` and `os.listdir(AGENT_DIR)`). This kind of information leakage can aid attackers in reconnaissance and path traversal exploits.
 **Learning:** Fallback endpoints or debug messages left in production can easily leak sensitive internal details (like file paths and directory listings) to unauthorized users.
 **Prevention:** Avoid returning internal filesystem paths, directory structures, or detailed stack traces in API responses, especially in default or fallback endpoints.
+## 2025-02-27 - [Information Disclosure in Fallback Endpoints]
+**Vulnerability:** Verbose error messages in the fallback endpoint (`frontend dir not found`) and the authentication middleware (`API_KEY environment variable is not set. The server is secured by default.`) leaked internal system state and configuration details to unauthorized users.
+**Learning:** Returning descriptive strings about missing files/directories or unset environment variables can provide an attacker with valuable reconnaissance information about the backend infrastructure and deployment state.
+**Prevention:** Always use standard, generic HTTP error responses (e.g., 404 "Not Found", 401 "Unauthorized") for unauthenticated requests, ensuring that internal configuration or filesystem states are never exposed.
