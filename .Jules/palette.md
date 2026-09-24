@@ -12,3 +12,6 @@
 ## 2026-09-18 - Autofocus on Primary Input
 **Learning:** Automatically focusing the primary input field on a single-purpose page reduces friction and improves the overall user experience.
 **Action:** Use the `autofocus` HTML attribute on primary input fields where the immediate user action is expected to be text entry.
+## 2024-05-19 - Improve stepper accessibility and hide decorative icons
+**Learning:** Purely decorative icons and emojis in `frontend/index.html` were read out loud by screen readers unnecessarily. Also, the stepper element lacked list roles making it hard for screen readers to convey structure.
+**Action:** When adding emojis or visual icons, make sure to add `aria-hidden="true"` to prevent redundant screen reader announcements. For step-by-step progress indicators, apply `role="list"` and `role="listitem"` to ensure correct semantic structure.
