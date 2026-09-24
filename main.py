@@ -58,7 +58,14 @@ async def verify_api_key(request: Request, call_next):
 
     # ⚡ Bolt Optimization: Use request.scope.get("path") instead of request.url.path
     # to avoid the overhead of constructing a URL object and parsing it on every request.
-    norm_path = posixpath.normpath(unquote(request.scope.get("path", "")))
+    raw_path = request.scope.get("path", "")
+
+    # ⚡ Bolt Optimization: Bypass path parsing overhead entirely for cached static files
+    # by checking the raw path against the cache before any normalization occurs.
+    if FRONTEND_DIR_EXISTS and _STATIC_CACHE.get(raw_path):
+        return await call_next(request)
+
+    norm_path = posixpath.normpath(unquote(raw_path))
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
 
@@ -70,7 +77,9 @@ async def verify_api_key(request: Request, call_next):
     if FRONTEND_DIR_EXISTS:
         is_static = _STATIC_CACHE.get(norm_path)
         if is_static is None:
-            file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
+            # ⚡ Bolt Optimization: Use string concatenation instead of os.path.join
+            # for faster path construction in high-frequency middleware
+            file_path = FRONTEND_DIR + norm_path
             is_static = os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
 
             if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
