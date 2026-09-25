@@ -21,3 +21,7 @@
 ## 2025-02-13 - Redundant abspath calculation in middleware
 **Learning:** Calculating `os.path.abspath` per-request in middleware for static file validation introduces unnecessary overhead. Since the base directory does not change during runtime, calculating it once at initialization provides measurable performance gains (e.g., ~25% improvement in path validation microbenchmarks).
 **Action:** Wrote an AST verification test to enforce that `os.path.abspath(FRONTEND_DIR)` is not called within middleware functions like `verify_api_key`, maintaining the optimization where a cached module-level `FRONTEND_DIR_ABSPATH_PREFIX` is used instead.
+
+## 2026-09-25 - Skip URL parsing overhead for static files
+**Learning:** In ASGI frameworks like FastAPI, `request.url.path` dynamically parses the URL, while `request.scope.get('path', '')` fetches the unparsed string. However, feeding that string through `posixpath.normpath(unquote(...))` still adds parsing overhead (~0.8ms vs 0.07ms) for high-frequency endpoints like static assets.
+**Action:** In high-frequency middleware that checks paths against caches or static sets (e.g., `PUBLIC_PATHS` or a static file cache), perform a fast-path lookup using the raw, unparsed `request.scope.get('path', '')` before performing normalization or unquoting.
