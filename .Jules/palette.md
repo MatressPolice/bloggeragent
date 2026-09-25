@@ -12,3 +12,7 @@
 ## 2026-09-18 - Autofocus on Primary Input
 **Learning:** Automatically focusing the primary input field on a single-purpose page reduces friction and improves the overall user experience.
 **Action:** Use the `autofocus` HTML attribute on primary input fields where the immediate user action is expected to be text entry.
+
+## 2023-10-24 - Accessibility improvements for decorative and dynamic UI elements
+**Learning:** Found that custom stepper components often lack proper semantic markup, leading to unhelpful screen reader announcements. Using native roles (`list` and `listitem`) and correctly toggling `aria-current="step"` significantly improves screen reader navigation. Additionally, purely decorative emojis or text icons should explicitly have `aria-hidden="true"` to prevent redundant/confusing vocalizations.
+**Action:** When creating progress indicators or multi-step UIs, always map them to native list semantics and manage `aria-current`. Ensure purely visual flourishes (emojis, icons) are explicitly hidden from screen readers.
