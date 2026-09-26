@@ -12,3 +12,7 @@
 **Vulnerability:** The `no_frontend` fallback endpoint returned `cwd` and `files` which exposed internal server directory structures (`os.getcwd()` and `os.listdir(AGENT_DIR)`). This kind of information leakage can aid attackers in reconnaissance and path traversal exploits.
 **Learning:** Fallback endpoints or debug messages left in production can easily leak sensitive internal details (like file paths and directory listings) to unauthorized users.
 **Prevention:** Avoid returning internal filesystem paths, directory structures, or detailed stack traces in API responses, especially in default or fallback endpoints.
+## 2026-09-26 - [Add Content-Security-Policy header]
+**Vulnerability:** The application was missing a Content-Security-Policy (CSP) header, which provides defense-in-depth against XSS and unauthorized resource loading.
+**Learning:** In FastAPI backend, explicitly include a Content-Security-Policy header in the security middleware to mitigate XSS attacks and control resource loading.
+**Prevention:** Always add a CSP header along with other baseline security headers.
