@@ -915,11 +915,11 @@
   <!-- ═══ HEADER ═══ -->
   <header class="app-header">
     <a href="#" class="app-logo">
-      <span class="app-logo-icon">✦</span>
+      <span class="app-logo-icon" aria-hidden="true">✦</span>
       <span>BloggerAgent</span>
     </a>
     <button id="themeToggle" class="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light theme">
-      🌙
+      <span aria-hidden="true">🌙</span>
     </button>
   </header>
 
@@ -939,7 +939,7 @@
         <input type="text" id="topicInput" class="topic-input" placeholder="e.g. Kubernetes autoscaling best practices"
           required autocomplete="off" aria-label="Blog topic" maxlength="200" autofocus />
         <button type="submit" id="generateBtn" class="generate-btn">
-          <span class="btn-icon">✦</span>
+          <span class="btn-icon" aria-hidden="true">✦</span>
           <span class="btn-text">Generate<span id="btnShortcut" class="btn-shortcut"></span></span>
           <span class="btn-spinner"></span>
         </button>
@@ -948,24 +948,24 @@
 
     <!-- Error Banner -->
     <div id="errorBanner" class="error-banner" role="alert">
-      <span>⚠</span>
+      <span aria-hidden="true">⚠</span>
       <span id="errorMessage"></span>
     </div>
 
     <!-- Stepper -->
     <div id="stepperCard" class="stepper-card glass-card">
-      <div class="stepper">
-        <div class="step pending" id="stepPlan">
+      <div class="stepper" role="list">
+        <div class="step pending" id="stepPlan" role="listitem">
           <div class="step-indicator">1</div>
           <span class="step-label">Planning outline…</span>
           <span class="step-elapsed" id="stepPlanTime"></span>
         </div>
-        <div class="step pending" id="stepWrite">
+        <div class="step pending" id="stepWrite" role="listitem">
           <div class="step-indicator">2</div>
           <span class="step-label">Writing article…</span>
           <span class="step-elapsed" id="stepWriteTime"></span>
         </div>
-        <div class="step pending" id="stepFinalize">
+        <div class="step pending" id="stepFinalize" role="listitem">
           <div class="step-indicator">3</div>
           <span class="step-label">Finalizing & formatting…</span>
           <span class="step-elapsed" id="stepFinalizeTime"></span>
@@ -990,10 +990,10 @@
     <div id="outputCard" class="output-card glass-card">
       <div class="output-actions">
         <button id="copyBtn" class="action-btn" title="Copy raw Markdown to clipboard">
-          <span id="copyIcon">📋</span> <span id="copyLabel">Copy Markdown</span>
+          <span id="copyIcon" aria-hidden="true">📋</span> <span id="copyLabel">Copy Markdown</span>
         </button>
         <button id="downloadBtn" class="action-btn" title="Download as .md file">
-          📥 Download .md
+          <span aria-hidden="true">📥</span> Download .md
         </button>
       </div>
       <div id="articleBody" class="article-body"></div>
@@ -1064,7 +1064,7 @@
        ═══════════════════════════════════════════════════ */
     function setTheme(theme) {
       document.documentElement.setAttribute("data-theme", theme);
-      themeToggle.textContent = theme === "dark" ? "🌙" : "☀️";
+      themeToggle.innerHTML = theme === "dark" ? '<span aria-hidden="true">🌙</span>' : '<span aria-hidden="true">☀️</span>';
       const hljsLink = $("#hljs-theme");
       hljsLink.href = theme === "dark"
         ? "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css"
@@ -1112,6 +1112,7 @@
       stepTimers = {};
       Object.values(stepEls).forEach(({ el, timeEl }) => {
         el.className = "step pending";
+        el.removeAttribute("aria-current");
         el.querySelector(".step-indicator").textContent =
           el === stepEls.plan.el ? "1" : el === stepEls.write.el ? "2" : "3";
         timeEl.textContent = "";
@@ -1144,6 +1145,7 @@
       if (activeStepKey && stepEls[activeStepKey]) {
         const prev = stepEls[activeStepKey];
         prev.el.className = "step complete";
+        prev.el.removeAttribute("aria-current");
         prev.el.querySelector(".step-indicator").textContent = "✓";
         if (stepTimers[activeStepKey]) {
           clearInterval(stepTimers[activeStepKey]);
@@ -1155,6 +1157,7 @@
       const curr = stepEls[key];
       if (!curr) return;
       curr.el.className = "step active";
+      curr.el.setAttribute("aria-current", "step");
       curr.el.querySelector(".step-indicator").textContent = "●";
 
       const stepStart = Date.now();
@@ -1166,6 +1169,7 @@
     function completeAllSteps() {
       Object.entries(stepEls).forEach(([key, { el, timeEl }]) => {
         el.className = "step complete";
+        el.removeAttribute("aria-current");
         el.querySelector(".step-indicator").textContent = "✓";
         if (stepTimers[key]) clearInterval(stepTimers[key]);
       });
@@ -1310,11 +1314,11 @@
       if (!rawMarkdown) return;
 
       const showCopiedState = () => {
-        copyIcon.textContent = "✓";
+        copyIcon.innerHTML = '<span aria-hidden="true">✓</span>';
         copyLabel.textContent = "Copied!";
         copyBtn.classList.add("copied");
         setTimeout(() => {
-          copyIcon.textContent = "📋";
+          copyIcon.innerHTML = '<span aria-hidden="true">📋</span>';
           copyLabel.textContent = "Copy Markdown";
           copyBtn.classList.remove("copied");
         }, 2000);
