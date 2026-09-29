@@ -21,3 +21,7 @@
 ## 2025-02-13 - Redundant abspath calculation in middleware
 **Learning:** Calculating `os.path.abspath` per-request in middleware for static file validation introduces unnecessary overhead. Since the base directory does not change during runtime, calculating it once at initialization provides measurable performance gains (e.g., ~25% improvement in path validation microbenchmarks).
 **Action:** Wrote an AST verification test to enforce that `os.path.abspath(FRONTEND_DIR)` is not called within middleware functions like `verify_api_key`, maintaining the optimization where a cached module-level `FRONTEND_DIR_ABSPATH_PREFIX` is used instead.
+
+## 2025-05-14 - Removed asyncio.to_thread for cached path validation
+**Learning:** `asyncio.to_thread` introduces overhead due to thread dispatch context switching. For path resolution in FastAPI middleware (like checking `os.path.isfile`), the caching mechanism already severely limits the number of times the blocking call is made. The overhead of context switching outweighs the benefit of non-blocking I/O here because `os.path.isfile` operates mostly on cached metadata and is invoked infrequently for new paths due to the LRU-like cache.
+**Action:** Replaced `await asyncio.to_thread(os.path.isfile, file_path)` with synchronous `os.path.isfile(file_path)` inside the static file middleware cache miss logic.
