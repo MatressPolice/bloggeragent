@@ -12,3 +12,7 @@
 **Vulnerability:** The `no_frontend` fallback endpoint returned `cwd` and `files` which exposed internal server directory structures (`os.getcwd()` and `os.listdir(AGENT_DIR)`). This kind of information leakage can aid attackers in reconnaissance and path traversal exploits.
 **Learning:** Fallback endpoints or debug messages left in production can easily leak sensitive internal details (like file paths and directory listings) to unauthorized users.
 **Prevention:** Avoid returning internal filesystem paths, directory structures, or detailed stack traces in API responses, especially in default or fallback endpoints.
+## 2025-02-14 - Fix Potential Path Traversal in Static File Serving
+**Vulnerability:** The static file serving logic used `os.path.abspath` instead of `os.path.realpath`, potentially allowing path traversal attacks via symlinks that point outside the frontend directory.
+**Learning:** `os.path.abspath` normalizes the path but does not resolve symlinks. When validating if a path remains within a safe base directory, resolving symlinks using `os.path.realpath` is crucial to prevent traversal attacks.
+**Prevention:** Always use `os.path.realpath` when normalizing paths for directory containment checks, particularly in file serving middleware where user-controlled paths are involved.
