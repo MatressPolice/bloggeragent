@@ -58,7 +58,7 @@ def test_auth_middleware_no_key_configured():
         client, _ = setup_test_client(reload=False)
         response = client.get("/list-apps")
         assert response.status_code == 401
-        assert "API_KEY environment variable is not set" in response.json()["detail"]
+        assert response.json()["detail"] == "API_KEY environment variable is not set. The server is secured by default."
 
 @patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_key_unauthorized():
