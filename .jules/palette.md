@@ -1,0 +1,3 @@
+## 2023-10-04 - Dynamic Icon Accessibility & Steppers
+**Learning:** When using JavaScript to update the text content of purely decorative icons (like emojis), using `.textContent` will obliterate essential accessibility attributes like `aria-hidden="true"`. Furthermore, visual progress steppers should be mapped to native `role="list"` and `role="listitem"` semantics with `aria-current="step"` applied dynamically to the active item to prevent redundant screen reader announcements.
+**Action:** Always use `.innerHTML` when dynamically updating elements containing decorative icons to preserve `aria-hidden="true"`. Apply appropriate list roles and `aria-current` to all future progress steppers.
