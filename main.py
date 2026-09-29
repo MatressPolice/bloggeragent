@@ -56,29 +56,52 @@ async def verify_api_key(request: Request, call_next):
     if request.method == "OPTIONS":
         return await call_next(request)
 
-    # ⚡ Bolt Optimization: Use request.scope.get("path") instead of request.url.path
-    # to avoid the overhead of constructing a URL object and parsing it on every request.
-    norm_path = posixpath.normpath(unquote(request.scope.get("path", "")))
-    if norm_path.startswith("//"):
-        norm_path = "/" + norm_path.lstrip("/")
+    # ⚡ Bolt Optimization: Fast path lookup using unparsed raw path
+    # Avoids posixpath.normpath and unquote overhead for cache hits.
+    raw_path = request.scope.get("path", "")
 
-    # If this route is meant to be public, skip auth
-    if norm_path in PUBLIC_PATHS:
+    if raw_path in PUBLIC_PATHS:
         return await call_next(request)
 
-    # Check if it's a valid static file in the frontend directory
-    if FRONTEND_DIR_EXISTS:
-        is_static = _STATIC_CACHE.get(norm_path)
-        if is_static is None:
-            file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-            is_static = os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
-
-            if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
-                _STATIC_CACHE.clear()
-            _STATIC_CACHE[norm_path] = is_static
-
+    is_static = _STATIC_CACHE.get(raw_path)
+    if is_static is not None:
         if is_static:
             return await call_next(request)
+        # If False, falls through to auth check
+    else:
+        # Slow path: normalize and cache
+        norm_path = posixpath.normpath(unquote(raw_path))
+        if norm_path.startswith("//"):
+            norm_path = "/" + norm_path.lstrip("/")
+
+        # If this route is meant to be public, skip auth
+        if norm_path in PUBLIC_PATHS:
+            return await call_next(request)
+
+        # Check if it's a valid static file in the frontend directory
+        if FRONTEND_DIR_EXISTS:
+            is_static = _STATIC_CACHE.get(norm_path)
+            if is_static is None:
+                file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
+                is_static = os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
+
+                if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
+                    _STATIC_CACHE.clear()
+                _STATIC_CACHE[norm_path] = is_static
+
+            # Cache the raw_path mapped to the result for future fast path lookups
+            if raw_path != norm_path and raw_path not in _STATIC_CACHE:
+                if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
+                    _STATIC_CACHE.clear()
+                _STATIC_CACHE[raw_path] = is_static
+
+            if is_static:
+                return await call_next(request)
+        else:
+            if raw_path not in _STATIC_CACHE:
+                if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
+                    _STATIC_CACHE.clear()
+                _STATIC_CACHE[raw_path] = False
 
     # Anything else requires authentication (default-deny policy)
 
