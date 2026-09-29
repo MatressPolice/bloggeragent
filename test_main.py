@@ -340,3 +340,14 @@ def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
         # it should be cached during init.
         mock_isdir.assert_not_called()
 
+
+def test_missing_frontend_fallback_direct():
+    try:
+        with patch("os.path.isdir", return_value=False):
+            client, _ = setup_test_client(reload=True)
+            response = client.get("/")
+            assert response.status_code == 200
+            assert response.json() == {"detail": "frontend dir not found"}
+    finally:
+        # Restore module state to prevent test pollution
+        importlib.reload(main)
