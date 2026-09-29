@@ -9,7 +9,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.gzip import GZipMiddleware
 from google.adk.cli.fast_api import get_fast_api_app
 
-API_KEY = os.getenv("API_KEY")
+def _get_api_key():
+    key = os.getenv("API_KEY")
+    if not key:
+        key_file = os.getenv("API_KEY_FILE")
+        if key_file and os.path.isfile(key_file):
+            with open(key_file, "r") as f:
+                key = f.read().strip()
+    return key
+
+API_KEY = _get_api_key()
 
 # Point to the directory containing your agent package
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -86,7 +95,7 @@ async def verify_api_key(request: Request, call_next):
     if not api_key:
         return JSONResponse(
             status_code=401,
-            content={"detail": "API_KEY environment variable is not set. The server is secured by default."}
+            content={"detail": "API_KEY or API_KEY_FILE environment variable is not set. The server is secured by default."}
         )
 
     auth_header = request.headers.get("Authorization")
