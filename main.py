@@ -58,11 +58,20 @@ async def verify_api_key(request: Request, call_next):
 
     # ⚡ Bolt Optimization: Use request.scope.get("path") instead of request.url.path
     # to avoid the overhead of constructing a URL object and parsing it on every request.
-    norm_path = posixpath.normpath(unquote(request.scope.get("path", "")))
+    raw_path = request.scope.get("path", "")
+
+    # Fast path: check raw_path in PUBLIC_PATHS or cache to skip parsing overhead
+    if raw_path in PUBLIC_PATHS:
+        return await call_next(request)
+
+    if FRONTEND_DIR_EXISTS and _STATIC_CACHE.get(raw_path) is True:
+        return await call_next(request)
+
+    norm_path = posixpath.normpath(unquote(raw_path))
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
 
-    # If this route is meant to be public, skip auth
+    # If this route is meant to be public (after normalization), skip auth
     if norm_path in PUBLIC_PATHS:
         return await call_next(request)
 
@@ -76,6 +85,12 @@ async def verify_api_key(request: Request, call_next):
             if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
                 _STATIC_CACHE.clear()
             _STATIC_CACHE[norm_path] = is_static
+
+        # Store raw path alias to skip normalization on future identical requests
+        if raw_path != norm_path:
+            if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
+                _STATIC_CACHE.clear()
+            _STATIC_CACHE[raw_path] = is_static
 
         if is_static:
             return await call_next(request)
