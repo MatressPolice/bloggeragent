@@ -919,7 +919,7 @@
       <span>BloggerAgent</span>
     </a>
     <button id="themeToggle" class="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light theme">
-      🌙
+      <span aria-hidden="true">🌙</span>
     </button>
   </header>
 
@@ -1064,7 +1064,7 @@
        ═══════════════════════════════════════════════════ */
     function setTheme(theme) {
       document.documentElement.setAttribute("data-theme", theme);
-      themeToggle.textContent = theme === "dark" ? "🌙" : "☀️";
+      themeToggle.innerHTML = `<span aria-hidden="true">${theme === "dark" ? "🌙" : "☀️"}</span>`;
       const hljsLink = $("#hljs-theme");
       hljsLink.href = theme === "dark"
         ? "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css"
