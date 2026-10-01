@@ -86,7 +86,7 @@ async def verify_api_key(request: Request, call_next):
     if not api_key:
         return JSONResponse(
             status_code=401,
-            content={"detail": "API_KEY environment variable is not set. The server is secured by default."}
+            content={"detail": "Unauthorized"}
         )
 
     auth_header = request.headers.get("Authorization")

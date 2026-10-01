@@ -12,3 +12,8 @@
 **Vulnerability:** The `no_frontend` fallback endpoint returned `cwd` and `files` which exposed internal server directory structures (`os.getcwd()` and `os.listdir(AGENT_DIR)`). This kind of information leakage can aid attackers in reconnaissance and path traversal exploits.
 **Learning:** Fallback endpoints or debug messages left in production can easily leak sensitive internal details (like file paths and directory listings) to unauthorized users.
 **Prevention:** Avoid returning internal filesystem paths, directory structures, or detailed stack traces in API responses, especially in default or fallback endpoints.
+
+## 2026-09-19 - [Fix information disclosure in API key validation]
+**Vulnerability:** The API key verification middleware returned an error message `API_KEY environment variable is not set. The server is secured by default.` when the key was missing. This leaks internal server configuration states to potential attackers.
+**Learning:** Returning specific reasons for authentication failures (like missing environment variables or configuration) can aid attackers in understanding the server's internal state.
+**Prevention:** Always use generic error messages like "Unauthorized" for authentication failures to prevent information disclosure.
