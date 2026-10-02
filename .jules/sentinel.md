@@ -12,3 +12,23 @@
 **Vulnerability:** The `no_frontend` fallback endpoint returned `cwd` and `files` which exposed internal server directory structures (`os.getcwd()` and `os.listdir(AGENT_DIR)`). This kind of information leakage can aid attackers in reconnaissance and path traversal exploits.
 **Learning:** Fallback endpoints or debug messages left in production can easily leak sensitive internal details (like file paths and directory listings) to unauthorized users.
 **Prevention:** Avoid returning internal filesystem paths, directory structures, or detailed stack traces in API responses, especially in default or fallback endpoints.
+
+## 2026-09-19 - [Information Disclosure in Fallback Endpoints]
+**Vulnerability:** Verbose error messages in the fallback endpoint (`frontend dir not found`) and the authentication middleware (`API_KEY environment variable is not set. The server is secured by default.`) leaked internal system state and configuration details to unauthorized users.
+**Learning:** Returning descriptive strings about missing files/directories or unset environment variables can provide an attacker with valuable reconnaissance information about the backend infrastructure and deployment state.
+**Prevention:** Always use standard, generic HTTP error responses (e.g., 404 "Not Found", 401 "Unauthorized") for unauthenticated requests, ensuring that internal configuration or filesystem states are never exposed.
+
+## 2026-09-19 - [Missing Content-Security-Policy Header]
+**Vulnerability:** The application was missing a Content-Security-Policy (CSP) header, which could allow malicious scripts to be executed or unauthorized resources to be loaded if an XSS vulnerability was present or if a third-party dependency was compromised.
+**Learning:** Even if HTML rendering uses DOMPurify and marked.js is considered safe, a defense-in-depth approach is necessary. Missing CSP leaves the application without an extra layer of defense against Cross-Site Scripting (XSS) and data injection attacks.
+**Prevention:** Always add a `Content-Security-Policy` header explicitly in API or middleware configuration to restrict external domains and lock down external resource loading (e.g. scripts, styles, fonts) to only trusted sources.
+
+## 2026-09-22 - Fix Auth Bypass via URL Decoding in Middleware
+**Vulnerability:** The middleware was manually decoding and normalizing `request.scope.get("path")` with `posixpath.normpath(unquote(...))`. This allowed an attacker to supply paths like `/api/secure/..%2f..%2fhealth` which bypassed authentication because the normalized path mapped to `/health` (a public route), but the application router handled the raw encoded path and routed the request to the secure endpoint.
+**Learning:** Do not use `posixpath.normpath(urllib.parse.unquote(path))` in FastAPI middleware for route validation. This creates path resolution mismatches with the underlying router.
+**Prevention:** Use raw `request.scope.get("path", "")` directly for validation, as FastAPI handles normalization consistently internally.
+
+## 2026-09-24 - Prevent Insecure CORS Wildcard Configuration
+**Vulnerability:** The application allowed the use of '*' in the ALLOWED_ORIGINS environment variable, which could permit cross-origin requests from any domain, compromising sensitive user data.
+**Learning:** External configuration variables that control security policies (such as CORS origins) must be explicitly validated and sanitized in the application code to prevent unsafe values from being accepted.
+**Prevention:** Add an explicit check in `main.py` to raise a ValueError if '*' is present in the `allow_origins` list derived from the `ALLOWED_ORIGINS` environment variable.
