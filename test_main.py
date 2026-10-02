@@ -274,11 +274,16 @@ def test_default_cors_origins():
     assert main_mod.allow_origins == []
 
 def test_frontend_dir_abspath_prefix_performance_optimization():
-    """Verify that the module-level FRONTEND_DIR_ABSPATH_PREFIX optimization is in place."""
-    expected_prefix = os.path.abspath(main.FRONTEND_DIR) + os.path.sep
-    assert main.FRONTEND_DIR_ABSPATH_PREFIX == expected_prefix, (
+    """Verify that the module-level FRONTEND_DIR_ABSPATH_PREFIX and REALPATH optimization is in place."""
+    expected_abs_prefix = os.path.abspath(main.FRONTEND_DIR) + os.path.sep
+    expected_real_prefix = os.path.realpath(main.FRONTEND_DIR) + os.path.sep
+    assert main.FRONTEND_DIR_ABSPATH_PREFIX == expected_abs_prefix, (
         "FRONTEND_DIR_ABSPATH_PREFIX must be calculated at module level "
         "to avoid redundant abspath calculations in the middleware."
+    )
+    assert main.FRONTEND_DIR_REALPATH_PREFIX == expected_real_prefix, (
+        "FRONTEND_DIR_REALPATH_PREFIX must be calculated at module level "
+        "to avoid redundant realpath calculations in the middleware."
     )
 
 def test_static_file_auth_bypass_success(mock_frontend_dir):
