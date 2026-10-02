@@ -52,3 +52,8 @@
 **Learning:** `secrets.compare_digest()` strictly enforces ASCII when given strings and will throw an exception if given unicode characters like emojis.
 **Prevention:** Always encode user-provided input and expected secret strings to bytes (e.g., `.encode("utf-8")`) before passing them to cryptographic comparison functions to ensure safe and deterministic behavior regardless of character sets.
 
+## 2026-10-02 - [Fix API Key Environment Exposure]
+**Vulnerability:** The application was keeping sensitive environment variables like `API_KEY` in `os.environ` after retrieving them during initialization. This creates a risk where secrets could be accidentally logged by third-party packages, exposed via debug endpoints, or leaked to spawned child processes.
+**Learning:** Leaving secrets in the process environment after they are loaded into application state unnecessarily expands the blast radius of potential information disclosure vulnerabilities.
+**Prevention:** Always use `os.environ.pop()` instead of `os.getenv()` when reading sensitive configuration at startup to ensure the secrets are immediately cleared from the environment variables array.
+
