@@ -385,3 +385,9 @@ def test_static_cache_eviction(mock_frontend_dir):
         assert len(main_mod._STATIC_CACHE) == 1
         assert f"/{test_filename}" in main_mod._STATIC_CACHE
         assert main_mod._STATIC_CACHE[f"/{test_filename}"] is True
+
+
+@patch.dict(os.environ, {"ALLOWED_ORIGINS": "*"})
+def test_insecure_cors_origins_raises_error():
+    with pytest.raises(ValueError, match=r"Insecure CORS configuration: '\*' is not allowed in ALLOWED_ORIGINS."):
+        importlib.reload(main)
