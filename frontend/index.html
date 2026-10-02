@@ -936,8 +936,11 @@
     <!-- Input Card -->
     <div class="input-card glass-card">
       <form id="generateForm" class="input-group">
-        <input type="text" id="topicInput" class="topic-input" placeholder="e.g. Kubernetes autoscaling best practices"
-          required autocomplete="off" aria-label="Blog topic" maxlength="200" autofocus />
+        <div style="flex: 1; position: relative; display: flex; align-items: center;">
+          <input type="text" id="topicInput" class="topic-input" placeholder="e.g. Kubernetes autoscaling best practices"
+            required autocomplete="off" aria-label="Blog topic" aria-describedby="charCount" maxlength="200" autofocus style="width: 100%;" />
+          <span id="charCount" style="position: absolute; right: 16px; font-size: var(--text-xs); color: var(--text-muted); pointer-events: none;">0/200</span>
+        </div>
         <button type="submit" id="generateBtn" class="generate-btn">
           <span class="btn-icon">✦</span>
           <span class="btn-text">Generate<span id="btnShortcut" class="btn-shortcut"></span></span>
@@ -1065,6 +1068,7 @@
     function setTheme(theme) {
       document.documentElement.setAttribute("data-theme", theme);
       themeToggle.textContent = theme === "dark" ? "🌙" : "☀️";
+      themeToggle.setAttribute("aria-label", theme === "dark" ? "Switch to light theme" : "Switch to dark theme");
       const hljsLink = $("#hljs-theme");
       hljsLink.href = theme === "dark"
         ? "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css"
@@ -1350,6 +1354,10 @@
     /* ═══════════════════════════════════════════════════
        FORM HANDLER
        ═══════════════════════════════════════════════════ */
+    topicInput.addEventListener('input', () => {
+      document.getElementById('charCount').textContent = `${topicInput.value.length}/200`;
+    });
+
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       if (isGenerating) return;

@@ -12,3 +12,7 @@
 ## 2026-09-18 - Autofocus on Primary Input
 **Learning:** Automatically focusing the primary input field on a single-purpose page reduces friction and improves the overall user experience.
 **Action:** Use the `autofocus` HTML attribute on primary input fields where the immediate user action is expected to be text entry.
+
+## 2026-10-27 - Dynamic ARIA Labels and Inline Feedback
+**Learning:** Bounded inputs (with maxlength) lacking visual feedback create anxiety for users. Simply truncating their typing without a cue is bad UX. Furthermore, icon-only buttons that toggle states (like a theme toggle) often fail accessibility checks if they only use static labels (e.g. "Toggle theme").
+**Action:** Always provide inline, real-time character counters for inputs with enforced length limits so users can adjust behavior before errors. Always use dynamic `aria-label` attributes for toggle buttons that accurately describe the *action* (e.g., "Switch to light theme") instead of describing the generic purpose.
