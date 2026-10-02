@@ -2,7 +2,7 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 9):** 6 of 15 PRs resolved (9 remaining)
+**Current Batch (Batch 9):** 7 of 15 PRs resolved (8 remaining)
 
 ---
 
@@ -16,12 +16,12 @@
 | **#89** | 🎨 Palette: Enhance a11y for icons and stepper | `palette-a11y-icons-stepper-18290018473607231880` | Closed as redundant. Progress stepper list semantics and accessibility improvements were already comprehensively integrated in PR #75; branch deleted and task archived. | ℹ️ Superseded by PR #75 | ✅ Archived ([`18290018473607231880`](https://jules.google.com/task/18290018473607231880)) |
 | **#90** | 🛡️ Sentinel: [MEDIUM] Add Content-Security-Policy (CSP) header | `fix-csp-header-8643049941875652251` | Closed as redundant. CSP header was already active from PR #72 and branch attempted to reintroduce vulnerable `normpath`/`unquote` removed in PR #86; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`8643049941875652251`](https://jules.google.com/task/8643049941875652251)) |
 | **#91** | 🎨 Palette: Improve screen reader accessibility for icons and stepper | `palette-a11y-stepper-13181009607880487490` | Closed as redundant. Screen reader enhancements for stepper and icons were already integrated in PR #75; branch deleted and task archived. | ℹ️ Superseded by PR #75 | ✅ Archived ([`13181009607880487490`](https://jules.google.com/task/13181009607880487490)) |
+| **#92** | 🛡️ Sentinel: [MEDIUM] Fix information disclosure in fallback and auth endpoints | `fix-information-disclosure-13338427502075137747` | Replaced verbose error responses in `verify_api_key` (`API_KEY environment variable is not set...` -> generic `Unauthorized`) and `no_frontend` (`frontend dir not found` -> 404 `Not Found`) in `main.py` to prevent infrastructure reconnaissance; updated test expectations in `test_main.py` and documented learnings in `.jules/sentinel.md`. | ✅ 33/33 Tests Passing | ✅ Archived ([`13338427502075137747`](https://jules.google.com/task/13338427502075137747)) |
 
 ---
 
 ## Remaining Open PRs in Batch 9 (15 PR Target: #86 - #100)
 
-- **PR #92**: `🛡️ Sentinel: [MEDIUM] Fix information disclosure in fallback and auth endpoints`
 - **PR #93**: `⚡ Bolt: skip path parsing overhead for cached static files`
 - **PR #94**: `🎨 Palette: Improve stepper accessibility and hide decorative icons`
 - **PR #95**: `🎨 Palette: Improve accessibility of UI components`
