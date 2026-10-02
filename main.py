@@ -30,8 +30,9 @@ FRONTEND_DIR_ABSPATH_PREFIX = os.path.abspath(FRONTEND_DIR) + os.path.sep
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
 allow_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
 
-if "*" in allow_origins:
-    raise ValueError("Insecure CORS configuration: '*' is not allowed in ALLOWED_ORIGINS.")
+for origin in allow_origins:
+    if "*" in origin:
+        raise ValueError("Insecure CORS configuration: '*' is not allowed in ALLOWED_ORIGINS.")
 
 app = get_fast_api_app(
     agents_dir=AGENT_DIR, 
