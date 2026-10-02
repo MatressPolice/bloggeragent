@@ -2,7 +2,7 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 8):** 9 of 15 PRs resolved (6 remaining)
+**Current Batch (Batch 8):** 10 of 15 PRs resolved (5 remaining)
 
 ---
 
@@ -19,12 +19,12 @@
 | **#77** | 🛡️ Sentinel: Add Content-Security-Policy defense-in-depth | `sentinel/add-csp-header-1718641153432080245` | Closed as redundant. CSP header already active via PR #72 without brittle hardcoded Cloud Run origin in `connect-src`; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`1718641153432080245`](https://jules.google.com/task/1718641153432080245)) |
 | **#78** | ⚡ Bolt: Add fast-path early exit for public routes | `bolt-fast-path-public-routes-4366382601739141204` | Closed as redundant. Fast-path check for `PUBLIC_PATHS` without normalization overhead was already implemented in PR #71; branch deleted and task archived. | ℹ️ Superseded by PR #71 | ✅ Archived ([`4366382601739141204`](https://jules.google.com/task/4366382601739141204)) |
 | **#79** | 🎨 Palette: Improve stepper accessibility | `palette-stepper-a11y-7767817510081019033` | Closed as redundant. Progress stepper list semantics and `aria-current` state management were already comprehensively integrated in PR #75; branch deleted and task archived. | ℹ️ Superseded by PR #75 | ✅ Archived ([`7767817510081019033`](https://jules.google.com/task/7767817510081019033)) |
+| **#80** | 🧹 Remove unused RunConfig import | `fix-unused-import-1758339599311777300` | Removed unused `RunConfig` import from `test_agent.py` to keep test module imports clean. | ✅ 32/32 Tests Passing | ✅ Archived ([`1758339599311777300`](https://jules.google.com/task/1758339599311777300)) |
 
 ---
 
 ## Remaining Open PRs in Batch 8 (15 PR Target: #71 - #85)
 
-- **PR #80**: `🧹 Remove unused RunConfig import`
 - **PR #81**: `🧹 Remove unused InvocationContext import`
 - **PR #82**: `🧹 Remove unused ToolContext import`
 - **PR #83**: `🧹 Remove unused Session import`
