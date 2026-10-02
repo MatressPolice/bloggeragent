@@ -419,3 +419,17 @@ def test_insecure_cors_origins_raises_error():
 def test_insecure_cors_origins_wildcard_raises_error():
     with pytest.raises(ValueError, match=r"Insecure CORS configuration: '\*' is not allowed in ALLOWED_ORIGINS."):
         importlib.reload(main)
+
+@patch('main.API_KEY', 'supersecret')
+def test_auth_middleware_with_non_ascii_token():
+    client, _ = setup_test_client(reload=False)
+    # Testing timing attack mitigation bug that fails with UnicodeEncodeError/TypeError
+    # by using a non-ASCII token value in the Bearer token.
+    # We must use raw bytes because httpx attempts to ascii-encode string headers by default.
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "Bearer 🙈".encode("utf-8")}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+

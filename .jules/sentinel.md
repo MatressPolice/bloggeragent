@@ -47,3 +47,8 @@
 **Learning:** Using an exact string match for wildcards in security policies can easily be bypassed by permutations of the wildcard.
 **Prevention:** Iterating through each origin and checking for the presence of the wildcard character (`*` in substring) correctly enforces strict policies and blocks any wildcard permutations.
 
+## 2026-10-02 - Unhandled TypeError in secrets.compare_digest
+**Vulnerability:** Passing non-ASCII strings to `secrets.compare_digest()` raises an unhandled `TypeError`, which bypasses normal error handling (returning a 500 instead of a 401) and presents a Denial of Service (DoS) vector if exploited heavily.
+**Learning:** `secrets.compare_digest()` strictly enforces ASCII when given strings and will throw an exception if given unicode characters like emojis.
+**Prevention:** Always encode user-provided input and expected secret strings to bytes (e.g., `.encode("utf-8")`) before passing them to cryptographic comparison functions to ensure safe and deterministic behavior regardless of character sets.
+
