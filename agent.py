@@ -90,20 +90,16 @@ robust_blog_writer = LoopAgent(
 planner_tool = agent_tool.AgentTool(agent=robust_blog_planner)
 writer_tool  = agent_tool.AgentTool(agent=robust_blog_writer)
 
-def get_blogger_instruction(context=None) -> str:
-    # Performance optimization: Evaluate datetime dynamically to avoid module import overhead
-    return f"""
+root_agent = Agent(
+    name="Blogger",
+    model=MODEL,
+    description="Multi-agent blogger orchestrator.",
+    instruction=lambda context=None: f"""
 When the user provides a topic:
 1) Call the planner tool to generate the outline.
 2) Call the writer tool to produce the full draft based on the outline.
 3) End the output with 3 alternate titles and 2 tweet-length hooks.
 Date: {datetime.datetime.now().strftime("%Y-%m-%d")}
-"""
-
-root_agent = Agent(
-    name="Blogger",
-    model=MODEL,
-    description="Multi-agent blogger orchestrator.",
-    instruction=get_blogger_instruction,
+""",
     tools=[planner_tool, writer_tool],
 )
