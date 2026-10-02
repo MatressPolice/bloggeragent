@@ -1,5 +1,4 @@
 import os
-import datetime
 from dotenv import load_dotenv
 from google.adk.agents import Agent, LoopAgent
 from google.adk.tools import agent_tool
@@ -92,6 +91,7 @@ writer_tool  = agent_tool.AgentTool(agent=robust_blog_writer)
 
 def get_blogger_instruction(context=None) -> str:
     # Performance optimization: Evaluate datetime dynamically to avoid module import overhead
+    import datetime
     return f"""
 When the user provides a topic:
 1) Call the planner tool to generate the outline.

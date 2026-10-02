@@ -8,7 +8,8 @@ from agent import (
     robust_blog_planner,
     blog_writer,
     robust_blog_writer,
-    root_agent
+    root_agent,
+    get_blogger_instruction
 )
 
 @pytest.fixture
@@ -116,6 +117,14 @@ def test_root_agent_config():
     assert root_agent.name == "Blogger"
     assert len(root_agent.tools) == 2
     assert "Multi-agent" in root_agent.description
+
+def test_get_blogger_instruction():
+    import datetime
+    instruction = get_blogger_instruction()
+    assert "When the user provides a topic:" in instruction
+    assert "Call the planner tool to generate the outline." in instruction
+    today_str = datetime.datetime.now().strftime("%Y-%m-%d")
+    assert f"Date: {today_str}" in instruction
 
 def test_root_agent_integration(mock_agent_call):
     mock_output = {"output": "Final Result with hooks and titles"}
