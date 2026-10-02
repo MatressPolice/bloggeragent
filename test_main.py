@@ -341,3 +341,40 @@ def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
         # it should be cached during init.
         mock_isdir.assert_not_called()
 
+def test_static_cache_eviction(mock_frontend_dir):
+    tmpdir = str(mock_frontend_dir.parent)
+    test_filename = f"test_cache_{uuid.uuid4().hex}.html"
+    test_filepath = os.path.join(str(mock_frontend_dir), test_filename)
+
+    with open(test_filepath, "w") as f:
+        f.write("<html><body>Cache Test</body></html>")
+
+    real_abspath = os.path.abspath
+    def mock_abspath(path):
+        if path.endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_abspath(path)
+
+    with (
+        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
+        client, main_mod = setup_test_client(reload=True)
+
+        # Pre-fill cache to max size
+        main_mod._STATIC_CACHE.clear()
+        for i in range(main_mod._MAX_CACHE_SIZE):
+            main_mod._STATIC_CACHE[f"/dummy_{i}.html"] = True
+
+        assert len(main_mod._STATIC_CACHE) == main_mod._MAX_CACHE_SIZE
+
+        # Request a new static file that is not in the cache
+        response = client.get(f"/{test_filename}")
+        assert response.status_code == 200
+
+        # Cache should have been evicted and now only contain the new file
+        assert len(main_mod._STATIC_CACHE) == 1
+        assert f"/{test_filename}" in main_mod._STATIC_CACHE
+        assert main_mod._STATIC_CACHE[f"/{test_filename}"] is True
