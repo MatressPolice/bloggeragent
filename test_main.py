@@ -57,7 +57,8 @@ def test_auth_middleware_no_key_configured():
     with patch.dict(os.environ, {}, clear=True), patch("main.API_KEY", None):
         client, _ = setup_test_client(reload=False)
         response = client.get("/list-apps")
-        assert "Unauthorized" in response.json()["detail"]
+        assert response.status_code == 401
+        assert response.json()["detail"] == "API_KEY environment variable is not set. The server is secured by default."
 
 def test_api_key_from_file(tmp_path):
     secret_file = tmp_path / "secret.txt"
