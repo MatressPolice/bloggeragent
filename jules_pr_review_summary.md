@@ -2,7 +2,7 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 9):** 0 of 15 PRs resolved (15 remaining)
+**Current Batch (Batch 9):** 1 of 15 PRs resolved (14 remaining)
 
 ---
 
@@ -10,12 +10,12 @@
 
 | PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
 | :---: | :--- | :--- | :--- | :--- | :---: |
+| **#86** | 🔒 Fix Authentication Bypass via URL Encoded Traversal in Middleware | `fix-auth-bypass-10099403023417489513` | Removed `unquote`/`normpath` manipulation on route verification in `verify_api_key` in `main.py` to prevent URL-encoded path traversal attacks (`/protected%2f..%2fhealth`); documented learnings in `.jules/sentinel.md`. | ✅ 33/33 Tests Passing | ✅ Archived ([`10099403023417489513`](https://jules.google.com/task/10099403023417489513)) |
 
 ---
 
 ## Remaining Open PRs in Batch 9 (15 PR Target: #86 - #100)
 
-- **PR #86**: `🔒 Fix Authentication Bypass via URL Encoded Traversal in Middleware`
 - **PR #87**: `🛡️ Sentinel: [HIGH] Fix authentication bypass in middleware`
 - **PR #88**: `⚡ Bolt: Optimize static file path construction`
 - **PR #89**: `🎨 Palette: Enhance a11y for icons and stepper`
