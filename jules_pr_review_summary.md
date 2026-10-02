@@ -2,30 +2,63 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 10):** Ready to begin (15 PRs queued: #101 - #115)  
-**Total PRs Resolved to Date:** 68 PRs across Batches 1–9
+**Current Batch (Batch 11):** 7 of 15 PRs resolved (#116 - #122 resolved; 8 remaining in batch: #123 - #130)  
+**Total PRs Resolved to Date:** 90 PRs across Batches 1–11  
+**Total Remaining Open PRs in Repo:** 10 PRs (#123 - #132)
 
 ---
 
-## Batch 10 Review & Resolution Table (Queued)
+## Batch 11 Review & Resolution Table (In Progress)
 
-| PR # | Title | Branch | Status |
-| :---: | :--- | :--- | :---: |
-| **#101** | ⚡ Bolt: Fast path cache lookup for static routes | `perf/fast-path-lookup-10744379981303128486` | Queued |
-| **#102** | 🛡️ Sentinel: [HIGH] Fix missing Content Security Policy header | `sentinel-csp-header-15016356810725339464` | Queued |
-| **#103** | 🎨 Palette: Improve screen reader semantics | `palette-a11y-improvements-497613556344482061` | Queued |
-| **#104** | 🛡️ Sentinel: [MEDIUM] Add Content-Security-Policy header | `sentinel-csp-header-7530319815736140632` | Queued |
-| **#105** | ⚡ Bolt: Add raw path cache lookup for static files | `bolt-fast-path-cache-5760940858733277720` | Queued |
-| **#106** | 🎨 Palette: Add proper ARIA semantics to stepper and icons | `palette-a11y-stepper-2631010058509727932` | Queued |
-| **#107** | 🛡️ Sentinel: [HIGH] Add Content-Security-Policy header | `sentinel-csp-header-18370013651324020918` | Queued |
-| **#108** | 🎨 Palette: Improve accessibility of interactive elements | `palette-a11y-icons-5673150992872998634` | Queued |
-| **#109** | ⚡ Bolt: optimize middleware path resolution | `bolt/optimize-middleware-path-9822148183711015182` | Queued |
-| **#110** | 🧹 Code Health: Remove unused import ToolContext in test_agent.py | `fix-unused-import-17340380225706252529` | Queued |
-| **#111** | 🧹 [code health improvement] Remove unused Session import in test_agent.py | `fix-unused-import-3131034660565823469` | Queued |
-| **#112** | 🧹 Remove unused RunConfig import | `fix-unused-import-13776136849553087381` | Queued |
-| **#113** | 🛡️ Sentinel: [Low] Fix information disclosure in missing API key response | `sentinel-api-key-leak-fix-1456736139667013736` | Queued |
-| **#114** | 🧹 Remove unused InvocationContext import | `fix-unused-import-12711168296831857288` | Queued |
-| **#115** | 🧹 [Code Health] Extract LoopAgent integration test harness to reduce duplication | `fix-test-duplication-9242179581921988845` | Queued |
+| PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
+| :---: | :--- | :--- | :--- | :--- | :---: |
+| **#116** | 🧪 Add static cache limit test | `test-static-cache-limit-17594963495813254590` | Closed as redundant. The `_STATIC_CACHE` limit eviction test `test_static_cache_eviction` was already added in PR #85; branch deleted and task archived. | ℹ️ Superseded by PR #85 | ✅ Archived ([`17594963495813254590`](https://jules.google.com/task/17594963495813254590)) |
+| **#117** | 🔒 Prevent insecure CORS wildcard configuration | `sentinel-cors-fix-15376999776605566453` | Added security validation in `main.py` raising a `ValueError` if `'*'` wildcard is detected in `ALLOWED_ORIGINS`; added test `test_insecure_cors_origins_raises_error` and documented learnings in `.jules/sentinel.md`. | ✅ 34/34 Tests Passing | ✅ Archived ([`15376999776605566453`](https://jules.google.com/task/15376999776605566453)) |
+| **#118** | ⚡ Bolt: dynamic instruction evaluation for root agent | `perf-opt-agent-instruction-4963148321419641522` | Refactored static f-string in `agent.py` to dynamic callable `get_blogger_instruction`, deferring evaluation to runtime and reducing import-time overhead; removed scratch benchmark script; documented learnings in `.jules/bolt.md`. | ✅ 34/34 Tests Passing | ✅ Archived ([`4963148321419641522`](https://jules.google.com/task/4963148321419641522)) |
+| **#119** | 🛡️ Sentinel: [Low] Support file-based secrets for API Key | `sentinel-file-secrets-14276878406345009350` | Added `_get_api_key()` helper in `main.py` supporting `API_KEY_FILE` fallback for container secret injection (Docker/Kubernetes) while preserving generic `Unauthorized` error; added unit tests in `test_main.py` and documented learnings in `.jules/sentinel.md`. | ✅ 36/36 Tests Passing | ✅ Archived ([`14276878406345009350`](https://jules.google.com/task/14276878406345009350)) |
+| **#120** | 🧪 Improve test for missing API_KEY variable | `fix-auth-test-11305807947007655493` | Closed as incompatible/obsolete. PR #92 replaced verbose error detail with generic `Unauthorized` to fix information disclosure; branch deleted and task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`11305807947007655493`](https://jules.google.com/task/11305807947007655493)) |
+| **#121** | 🛡️ Sentinel: [Medium] Fix Potential Path Traversal in Static File Serving | `sentinel-path-traversal-fix-15307754076813143961` | Closed as superseded by PR #132 which comprehensively updates `realpath` symlink handling and test mocking; branch deleted and task archived. | ℹ️ Superseded by PR #132 | ✅ Archived ([`15307754076813143961`](https://jules.google.com/task/15307754076813143961)) |
+| **#122** | 🧪 Add direct unit test for no_frontend fallback | `jules-testing-improvement-fallback-12461218026795367011` | Closed as redundant/incompatible. PR #92 changed `no_frontend` to return 404 `Not Found`, which is already covered by `test_no_frontend_endpoint`; branch deleted and task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`12461218026795367011`](https://jules.google.com/task/12461218026795367011)) |
+
+---
+
+## Remaining Open PRs (#123 - #132)
+
+- **PR #123**: `⚡ Bolt: Remove asyncio.to_thread overhead for static file caching`
+- **PR #124**: `⚡ Bolt: Fast path cache checking before unquote/posixpath parsing`
+- **PR #125**: `🎨 Palette: Improve screen reader experience for theme toggle`
+- **PR #126**: `🛡️ Sentinel: [MEDIUM] Fix information disclosure in API failure response`
+- **PR #127**: `⚡ Bolt: Add fast-path cache lookup in middleware`
+- **PR #128**: `🎨 Palette: Add aria-hidden to theme toggle emoji`
+- **PR #129**: `🛡️ Sentinel: [MEDIUM] Fix information disclosure in API Key validation`
+- **PR #130**: `⚡ Bolt: Add fast-path raw path lookup for static file cache`
+- **PR #131**: `🎨 Palette: Improve empty form submission UX`
+- **PR #132**: `🛡️ Sentinel: [CRITICAL] Fix path traversal bypass via symlinks`
+
+---
+
+<details>
+<summary><b>Batch 10 Completed PRs (#101 - #115) [Expand]</b></summary>
+
+| PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
+| :---: | :--- | :--- | :--- | :--- | :---: |
+| **#101** | ⚡ Bolt: Fast path cache lookup for static routes | `perf/fast-path-lookup-10744379981303128486` | Closed as redundant/incompatible. Fast-path for public paths was already merged in PR #71 and branch re-introduced vulnerable `unquote`/`normpath` auth bypass removed in PR #86; branch deleted and task archived. | ℹ️ Superseded / Incompatible | ✅ Archived ([`10744379981303128486`](https://jules.google.com/task/10744379981303128486)) |
+| **#102** | 🛡️ Sentinel: [HIGH] Fix missing Content Security Policy header | `sentinel-csp-header-15016356810725339464` | Closed as redundant. Comprehensive CSP header was already added and verified in PR #72 without brittle hardcoded URLs; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`15016356810725339464`](https://jules.google.com/task/15016356810725339464)) |
+| **#103** | 🎨 Palette: Improve screen reader semantics | `palette-a11y-improvements-497613556344482061` | Closed as redundant. Stepper list semantics and `aria-hidden` attributes on decorative icons were already implemented in PR #75; branch deleted and task archived. | ℹ️ Superseded by PR #75 | ✅ Archived ([`497613556344482061`](https://jules.google.com/task/497613556344482061)) |
+| **#104** | 🛡️ Sentinel: [MEDIUM] Add Content-Security-Policy header | `sentinel-csp-header-7530319815736140632` | Closed as redundant. Comprehensive CSP header was already added and verified in PR #72; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`7530319815736140632`](https://jules.google.com/task/7530319815736140632)) |
+| **#105** | ⚡ Bolt: Add raw path cache lookup for static files | `bolt-fast-path-cache-5760940858733277720` | Closed as redundant/incompatible. Fast-path check was merged in PR #71 and branch re-introduced vulnerable `unquote`/`normpath` auth bypass removed in PR #86; branch deleted and task archived. | ℹ️ Superseded / Incompatible | ✅ Archived ([`5760940858733277720`](https://jules.google.com/task/5760940858733277720)) |
+| **#106** | 🎨 Palette: Add proper ARIA semantics to stepper and icons | `palette-a11y-stepper-2631010058509727932` | Closed as redundant. Stepper list semantics and `aria-hidden` attributes were already implemented in PR #75; branch deleted and task archived. | ℹ️ Superseded by PR #75 | ✅ Archived ([`2631010058509727932`](https://jules.google.com/task/2631010058509727932)) |
+| **#107** | 🛡️ Sentinel: [HIGH] Add Content-Security-Policy header | `sentinel-csp-header-18370013651324020918` | Closed as redundant. Comprehensive CSP header was already added and verified in PR #72; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`18370013651324020918`](https://jules.google.com/task/18370013651324020918)) |
+| **#108** | 🎨 Palette: Improve accessibility of interactive elements | `palette-a11y-icons-5673150992872998634` | Closed as redundant. Stepper list semantics and `aria-hidden` attributes were already implemented in PR #75; branch deleted and task archived. | ℹ️ Superseded by PR #75 | ✅ Archived ([`5673150992872998634`](https://jules.google.com/task/5673150992872998634)) |
+| **#109** | ⚡ Bolt: optimize middleware path resolution | `bolt/optimize-middleware-path-9822148183711015182` | Closed as redundant/incompatible. Superseded by PR #71 (fast-path for public paths) and incompatible with security fix in PR #86 (unquote/normpath removed to prevent auth bypass); branch deleted and task archived. | ℹ️ Superseded / Incompatible | ✅ Archived ([`9822148183711015182`](https://jules.google.com/task/9822148183711015182)) |
+| **#110** | 🧹 Code Health: Remove unused import ToolContext in test_agent.py | `fix-unused-import-17340380225706252529` | Closed as redundant. Unused `ToolContext` import was already removed in PR #82; branch deleted and task archived. | ℹ️ Superseded by PR #82 | ✅ Archived ([`17340380225706252529`](https://jules.google.com/task/17340380225706252529)) |
+| **#111** | 🧹 [code health improvement] Remove unused Session import in test_agent.py | `fix-unused-import-3131034660565823469` | Closed as redundant. Unused `Session` import was already removed in PR #83; branch deleted and task archived. | ℹ️ Superseded by PR #83 | ✅ Archived ([`3131034660565823469`](https://jules.google.com/task/3131034660565823469)) |
+| **#112** | 🧹 Remove unused RunConfig import | `fix-unused-import-13776136849553087381` | Closed as redundant. Unused `RunConfig` import was already removed in PR #80; branch deleted and task archived. | ℹ️ Superseded by PR #80 | ✅ Archived ([`13776136849553087381`](https://jules.google.com/task/13776136849553087381)) |
+| **#113** | 🛡️ Sentinel: [Low] Fix information disclosure in missing API key response | `sentinel-api-key-leak-fix-1456736139667013736` | Closed as redundant. Generic `Unauthorized` response was already integrated in PR #92; branch deleted and task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`1456736139667013736`](https://jules.google.com/task/1456736139667013736)) |
+| **#114** | 🧹 Remove unused InvocationContext import | `fix-unused-import-12711168296831857288` | Closed as redundant. Unused `InvocationContext` import was already removed in PR #81; branch deleted and task archived. | ℹ️ Superseded by PR #81 | ✅ Archived ([`12711168296831857288`](https://jules.google.com/task/12711168296831857288)) |
+| **#115** | 🧹 [Code Health] Extract LoopAgent integration test harness to reduce duplication | `fix-test-duplication-9242179581921988845` | Extracted duplicated LoopAgent test harness logic in `test_agent.py` into a reusable `_run_loop_agent_integration_test` helper, removing ~60 lines of repetitive test code while keeping all assertions intact. | ✅ 33/33 Tests Passing | ✅ Archived ([`9242179581921988845`](https://jules.google.com/task/9242179581921988845)) |
+
+</details>
 
 ---
 
