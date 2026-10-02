@@ -1,8 +1,6 @@
 import os
 import asyncio
 import secrets
-import posixpath
-from urllib.parse import unquote
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -32,6 +30,9 @@ FRONTEND_DIR_ABSPATH_PREFIX = os.path.abspath(FRONTEND_DIR) + os.path.sep
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
 allow_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
 
+if "*" in allow_origins:
+    raise ValueError("Insecure CORS configuration: '*' is not allowed in ALLOWED_ORIGINS.")
+
 app = get_fast_api_app(
     agents_dir=AGENT_DIR, 
     web=False,
@@ -57,6 +58,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; connect-src 'self'"
     return response
 
 @app.middleware("http")
@@ -67,7 +69,13 @@ async def verify_api_key(request: Request, call_next):
 
     # ⚡ Bolt Optimization: Use request.scope.get("path") instead of request.url.path
     # to avoid the overhead of constructing a URL object and parsing it on every request.
-    norm_path = posixpath.normpath(unquote(request.scope.get("path", "")))
+    raw_path = request.scope.get("path", "")
+
+    # Fast path for public routes without normalization overhead
+    if raw_path in PUBLIC_PATHS:
+        return await call_next(request)
+
+    norm_path = raw_path
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
 
@@ -95,7 +103,7 @@ async def verify_api_key(request: Request, call_next):
     if not api_key:
         return JSONResponse(
             status_code=401,
-            content={"detail": "API_KEY or API_KEY_FILE environment variable is not set. The server is secured by default."}
+            content={"detail": "Unauthorized"}
         )
 
     auth_header = request.headers.get("Authorization")
@@ -114,4 +122,4 @@ if FRONTEND_DIR_EXISTS:
 else:
     @app.get("/")
     def no_frontend():
-        return {"detail": "frontend dir not found"}
+        return JSONResponse(status_code=404, content={"detail": "Not Found"})

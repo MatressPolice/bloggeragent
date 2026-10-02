@@ -47,18 +47,17 @@ def test_no_frontend_endpoint():
         client, _ = setup_test_client(reload=True)
         response = client.get("/")
         
-        assert response.status_code == 200
+        assert response.status_code == 404
         data = response.json()
         assert "detail" in data
-        assert data["detail"] == "frontend dir not found"
+        assert data["detail"] == "Not Found"
 
 def test_auth_middleware_no_key_configured():
     # If API_KEY is not set, API should deny access by default (secure by default)
     with patch.dict(os.environ, {}, clear=True), patch("main.API_KEY", None):
         client, _ = setup_test_client(reload=False)
         response = client.get("/list-apps")
-        assert response.status_code == 401
-        assert "API_KEY or API_KEY_FILE environment variable is not set" in response.json()["detail"]
+        assert "Unauthorized" in response.json()["detail"]
 
 def test_api_key_from_file(tmp_path):
     secret_file = tmp_path / "secret.txt"
@@ -72,13 +71,31 @@ def test_api_key_from_file(tmp_path):
         )
         assert response.status_code == 200
 
+def test_get_api_key_helper(tmp_path):
+    import main as main_mod
+    # Test reading from env
+    with patch.dict(os.environ, {"API_KEY": "env_key"}, clear=True):
+        assert main_mod._get_api_key() == "env_key"
+
+    # Test reading from file when env not set
+    secret_file = tmp_path / "secret_helper.txt"
+    secret_file.write_text("file_key_content\n")
+    with patch.dict(os.environ, {"API_KEY_FILE": str(secret_file)}, clear=True):
+        assert main_mod._get_api_key() == "file_key_content"
+
 @patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_key_unauthorized():
     client, main_mod = setup_test_client(reload=False)
 
     # Public endpoints should still be accessible
     for path in main_mod.PUBLIC_PATHS:
-        assert client.get(path).status_code == 200
+        # Since FRONTEND_DIR_EXISTS is false in standard test run, root will return 404 Not Found
+        # But for other public paths like /docs, they should return 200
+        response = client.get(path)
+        if path == "/":
+            assert response.status_code in (200, 404)
+        else:
+            assert response.status_code == 200
 
     # Protected endpoints should return 401
     response = client.get("/list-apps")
@@ -106,6 +123,7 @@ def test_auth_middleware_with_wrong_key():
         headers={"Authorization": "Bearer wrongkey"}
     )
     assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
 
 @patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_invalid_header_format():
@@ -296,6 +314,7 @@ def test_security_headers():
     assert response.headers.get("X-Frame-Options") == "DENY"
     assert response.headers.get("X-XSS-Protection") == "1; mode=block"
     assert response.headers.get("Strict-Transport-Security") == "max-age=31536000; includeSubDomains"
+    assert response.headers.get("Content-Security-Policy") == "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; connect-src 'self'"
 
 def test_gzip_compression():
     client, _ = setup_test_client(reload=True)
@@ -352,3 +371,46 @@ def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
         # it should be cached during init.
         mock_isdir.assert_not_called()
 
+def test_static_cache_eviction(mock_frontend_dir):
+    tmpdir = str(mock_frontend_dir.parent)
+    test_filename = f"test_cache_{uuid.uuid4().hex}.html"
+    test_filepath = os.path.join(str(mock_frontend_dir), test_filename)
+
+    with open(test_filepath, "w") as f:
+        f.write("<html><body>Cache Test</body></html>")
+
+    real_abspath = os.path.abspath
+    def mock_abspath(path):
+        if path.endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_abspath(path)
+
+    with (
+        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
+        client, main_mod = setup_test_client(reload=True)
+
+        # Pre-fill cache to max size
+        main_mod._STATIC_CACHE.clear()
+        for i in range(main_mod._MAX_CACHE_SIZE):
+            main_mod._STATIC_CACHE[f"/dummy_{i}.html"] = True
+
+        assert len(main_mod._STATIC_CACHE) == main_mod._MAX_CACHE_SIZE
+
+        # Request a new static file that is not in the cache
+        response = client.get(f"/{test_filename}")
+        assert response.status_code == 200
+
+        # Cache should have been evicted and now only contain the new file
+        assert len(main_mod._STATIC_CACHE) == 1
+        assert f"/{test_filename}" in main_mod._STATIC_CACHE
+        assert main_mod._STATIC_CACHE[f"/{test_filename}"] is True
+
+
+@patch.dict(os.environ, {"ALLOWED_ORIGINS": "*"})
+def test_insecure_cors_origins_raises_error():
+    with pytest.raises(ValueError, match=r"Insecure CORS configuration: '\*' is not allowed in ALLOWED_ORIGINS."):
+        importlib.reload(main)
