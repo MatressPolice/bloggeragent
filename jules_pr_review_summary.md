@@ -2,7 +2,7 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 8):** 12 of 15 PRs resolved (3 remaining)
+**Current Batch (Batch 8):** 13 of 15 PRs resolved (2 remaining)
 
 ---
 
@@ -22,12 +22,12 @@
 | **#80** | 🧹 Remove unused RunConfig import | `fix-unused-import-1758339599311777300` | Removed unused `RunConfig` import from `test_agent.py` to keep test module imports clean. | ✅ 32/32 Tests Passing | ✅ Archived ([`1758339599311777300`](https://jules.google.com/task/1758339599311777300)) |
 | **#81** | 🧹 Remove unused InvocationContext import | `fix-unused-import-18390462440545580597` | Removed unused `InvocationContext` import from `test_agent.py` to keep test module imports clean. | ✅ 32/32 Tests Passing | ✅ Archived ([`18390462440545580597`](https://jules.google.com/task/18390462440545580597)) |
 | **#82** | 🧹 Remove unused ToolContext import | `code-health/remove-toolcontext-9500689771068259023` | Removed unused `ToolContext` import from `test_agent.py` to keep test module imports clean. | ✅ 32/32 Tests Passing | ✅ Archived ([`9500689771068259023`](https://jules.google.com/task/9500689771068259023)) |
+| **#83** | 🧹 Remove unused Session import | `code-health-remove-session-import-13479518909678935865` | Removed unused `Session` import from `test_agent.py` to keep test module imports clean. | ✅ 32/32 Tests Passing | ✅ Archived ([`13479518909678935865`](https://jules.google.com/task/13479518909678935865)) |
 
 ---
 
 ## Remaining Open PRs in Batch 8 (15 PR Target: #71 - #85)
 
-- **PR #83**: `🧹 Remove unused Session import`
 - **PR #84**: `🧹 Refactor: Extract AST visitors`
 - **PR #85**: `🧪 Add test for static cache eviction`
 
