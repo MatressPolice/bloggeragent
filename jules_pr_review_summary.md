@@ -3,15 +3,15 @@
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
 **Status:** 🎉 Complete — 100% of PRs reviewed and resolved!  
-**Total PRs Resolved to Date:** 113 PRs across Batches 1–12 (#33 – #145)  
+**Total PRs Resolved to Date:** 114 PRs across Batches 1–12 (#33 – #146)  
 **Total Remaining Open PRs in Repo:** 0 PRs  
 
 ---
 
-## Batch 12 Completed PRs (#131 - #145) [Final Batch - 100% Repository Completion]
+## Batch 12 Completed PRs (#131 - #146) [Final Batch - 100% Repository Completion]
 
 | PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
-| :---: | :--- | :--- | :--- | :--- | :--- | :---: |
+| :---: | :--- | :--- | :--- | :--- | :--- | :--- |
 | **#131** | 🎨 Palette: Improve empty form submission UX | `palette-empty-state-ux-2760272115847903462` | Added explicit error banner feedback when submitting empty or whitespace-only topic in `frontend/index.html` preventing silent dead-clicks; consolidated Palette UX learnings in `.jules/palette.md`. | ✅ 36/36 Tests Passing | ✅ Archived ([`2760272115847903462`](https://jules.google.com/task/2760272115847903462)) |
 | **#132** | 🛡️ Sentinel: [CRITICAL] Fix path traversal bypass via symlinks | `fix-path-traversal-symlinks-9781780029176316859` | Replaced `os.path.abspath` with `os.path.realpath` in `main.py` to prevent symlink traversal attacks, defined `FRONTEND_DIR_REALPATH_PREFIX`, renamed performance test to `test_performance_realpath.py`, and updated test fixtures. | ✅ 36/36 Tests Passing | ✅ Archived ([`9781780029176316859`](https://jules.google.com/task/9781780029176316859)) |
 | **#133** | 🧹 Code Health: Acknowledge superseded PR for unused RunConfig import | `jules-12710531307445181533-35e124c4` | Closed as superseded (0 diff). Unused `RunConfig` import was already removed in PR #80; task archived. | ℹ️ Superseded by PR #80 | ✅ Archived ([`12710531307445181533`](https://jules.google.com/task/12710531307445181533)) |
@@ -27,6 +27,7 @@
 | **#143** | 🧪 Add test for missing frontend directory fallback endpoint | `jules-3877337427645789233-5e18205d` | Closed as superseded (0 diff). Test `test_no_frontend_endpoint` already tests this fallback condition; task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`3877337427645789233`](https://jules.google.com/task/3877337427645789233)) |
 | **#144** | 🛡️ Sentinel: [Medium] Fix secrets exposed via environment variables | `sentinel-fix-api-key-exposure-001-15433877770122543174` | Used `os.environ.pop()` to clear `API_KEY` and `API_KEY_FILE` immediately upon reading into memory in `main.py`, reducing secret leakage surface area; added unit test `test_api_key_removed_from_env`. | ✅ 41/41 Tests Passing | ✅ Archived ([`15433877770122543174`](https://jules.google.com/task/15433877770122543174)) |
 | **#145** | 🔒 Sentinel: High Path Traversal Vulnerability Fix | `fix-path-traversal-12212568893884408321` | Closed as redundant with PR #132 which already implemented `os.path.realpath` and `FRONTEND_DIR_REALPATH_PREFIX` without unquote resolution mismatch risks; task archived. | ℹ️ Superseded by PR #132 | ✅ Archived ([`12212568893884408321`](https://jules.google.com/task/12212568893884408321)) |
+| **#146** | 🧹 Code Health: move datetime import into function scope to honor optimization comment | `fix-datetime-import-8245109136345045673` | Moved `import datetime` from module level to inside `get_blogger_instruction` in `agent.py` to defer import cost and match inline comment; added unit test `test_get_blogger_instruction` in `test_agent.py`. | ✅ 42/42 Tests Passing | ✅ Archived ([`8245109136345045673`](https://jules.google.com/task/8245109136345045673)) |
 
 ---
 
