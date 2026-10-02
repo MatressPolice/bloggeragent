@@ -83,6 +83,14 @@ def test_get_api_key_helper(tmp_path):
     with patch.dict(os.environ, {"API_KEY_FILE": str(secret_file)}, clear=True):
         assert main_mod._get_api_key() == "file_key_content"
 
+def test_api_key_removed_from_env():
+    import main as main_mod
+    with patch.dict(os.environ, {"API_KEY": "secret_in_env", "API_KEY_FILE": "secret_file_in_env"}, clear=True):
+        key = main_mod._get_api_key()
+        assert key == "secret_in_env"
+        assert "API_KEY" not in os.environ
+        assert "API_KEY_FILE" not in os.environ
+
 @patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_key_unauthorized():
     client, main_mod = setup_test_client(reload=False)

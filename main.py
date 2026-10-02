@@ -8,9 +8,9 @@ from fastapi.middleware.gzip import GZipMiddleware
 from google.adk.cli.fast_api import get_fast_api_app
 
 def _get_api_key():
-    key = os.getenv("API_KEY")
+    key = os.environ.pop("API_KEY", None)
+    key_file = os.environ.pop("API_KEY_FILE", None)
     if not key:
-        key_file = os.getenv("API_KEY_FILE")
         if key_file and os.path.isfile(key_file):
             with open(key_file, "r") as f:
                 key = f.read().strip()

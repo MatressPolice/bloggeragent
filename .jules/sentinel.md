@@ -37,3 +37,8 @@
 **Vulnerability:** Relying solely on environment variables (`API_KEY`) for secrets can lead to exposure via process lists, logs, or debugging endpoints in production environments like Docker or Kubernetes.
 **Learning:** Best practices dictate supporting file-based secret injection (e.g., Docker Secrets mounted at `/run/secrets/...`), as reading from memory/files avoids environment variable leakage.
 **Prevention:** Always provide a fallback to read secrets from files (like `API_KEY_FILE`) when configuring applications.
+
+## 2026-10-02 - [Fix API Key Environment Exposure]
+**Vulnerability:** The application was keeping sensitive environment variables like `API_KEY` in `os.environ` after retrieving them during initialization. This creates a risk where secrets could be accidentally logged by third-party packages, exposed via debug endpoints, or leaked to spawned child processes.
+**Learning:** Leaving secrets in the process environment after they are loaded into application state unnecessarily expands the blast radius of potential information disclosure vulnerabilities.
+**Prevention:** Always use `os.environ.pop()` instead of `os.getenv()` when reading sensitive configuration at startup to ensure the secrets are immediately cleared from the environment variables array.
