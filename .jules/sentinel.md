@@ -28,7 +28,18 @@
 **Learning:** Do not use `posixpath.normpath(urllib.parse.unquote(path))` in FastAPI middleware for route validation. This creates path resolution mismatches with the underlying router.
 **Prevention:** Use raw `request.scope.get("path", "")` directly for validation, as FastAPI handles normalization consistently internally.
 
+## 2026-09-24 - Prevent Insecure CORS Wildcard Configuration
+**Vulnerability:** The application allowed the use of '*' in the ALLOWED_ORIGINS environment variable, which could permit cross-origin requests from any domain, compromising sensitive user data.
+**Learning:** External configuration variables that control security policies (such as CORS origins) must be explicitly validated and sanitized in the application code to prevent unsafe values from being accepted.
+**Prevention:** Add an explicit check in `main.py` to raise a ValueError if '*' is present in the `allow_origins` list derived from the `ALLOWED_ORIGINS` environment variable.
+
+## 2026-09-29 - [Support file-based secrets for API Key]
+**Vulnerability:** Relying solely on environment variables (`API_KEY`) for secrets can lead to exposure via process lists, logs, or debugging endpoints in production environments like Docker or Kubernetes.
+**Learning:** Best practices dictate supporting file-based secret injection (e.g., Docker Secrets mounted at `/run/secrets/...`), as reading from memory/files avoids environment variable leakage.
+**Prevention:** Always provide a fallback to read secrets from files (like `API_KEY_FILE`) when configuring applications.
+
 ## 2026-10-02 - [Fix Path Traversal bypass via symlinks]
 **Vulnerability:** The static file serving logic in `verify_api_key` middleware validated paths using `os.path.abspath()`. This fails to resolve symbolic links properly, potentially allowing attackers to supply paths with symlinks that bypass the prefix-checking boundary and exploit path traversal, leaking sensitive system or application files.
 **Learning:** Using `os.path.abspath()` is insufficient for securely verifying if a user-provided file path falls strictly within a designated safe directory when symbolic links are involved.
 **Prevention:** Always use `os.path.realpath()` instead of `os.path.abspath()` when validating that a requested path remains within a safe base directory to properly resolve symlinks and prevent path traversal vulnerabilities.
+

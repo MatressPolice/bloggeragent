@@ -7,7 +7,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.gzip import GZipMiddleware
 from google.adk.cli.fast_api import get_fast_api_app
 
-API_KEY = os.getenv("API_KEY")
+def _get_api_key():
+    key = os.getenv("API_KEY")
+    if not key:
+        key_file = os.getenv("API_KEY_FILE")
+        if key_file and os.path.isfile(key_file):
+            with open(key_file, "r") as f:
+                key = f.read().strip()
+    return key
+
+API_KEY = _get_api_key()
 
 # Point to the directory containing your agent package
 AGENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -20,6 +29,9 @@ FRONTEND_DIR_REALPATH_PREFIX = os.path.realpath(FRONTEND_DIR) + os.path.sep
 # and OriginCheckMiddleware properly accept the frontend's cross-origin requests.
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
 allow_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+
+if "*" in allow_origins:
+    raise ValueError("Insecure CORS configuration: '*' is not allowed in ALLOWED_ORIGINS.")
 
 app = get_fast_api_app(
     agents_dir=AGENT_DIR, 
