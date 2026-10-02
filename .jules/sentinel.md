@@ -27,3 +27,13 @@
 **Vulnerability:** The middleware was manually decoding and normalizing `request.scope.get("path")` with `posixpath.normpath(unquote(...))`. This allowed an attacker to supply paths like `/api/secure/..%2f..%2fhealth` which bypassed authentication because the normalized path mapped to `/health` (a public route), but the application router handled the raw encoded path and routed the request to the secure endpoint.
 **Learning:** Do not use `posixpath.normpath(urllib.parse.unquote(path))` in FastAPI middleware for route validation. This creates path resolution mismatches with the underlying router.
 **Prevention:** Use raw `request.scope.get("path", "")` directly for validation, as FastAPI handles normalization consistently internally.
+
+## 2026-09-24 - Prevent Insecure CORS Wildcard Configuration
+**Vulnerability:** The application allowed the use of '*' in the ALLOWED_ORIGINS environment variable, which could permit cross-origin requests from any domain, compromising sensitive user data.
+**Learning:** External configuration variables that control security policies (such as CORS origins) must be explicitly validated and sanitized in the application code to prevent unsafe values from being accepted.
+**Prevention:** Add an explicit check in `main.py` to raise a ValueError if '*' is present in the `allow_origins` list derived from the `ALLOWED_ORIGINS` environment variable.
+
+## 2026-09-29 - [Support file-based secrets for API Key]
+**Vulnerability:** Relying solely on environment variables (`API_KEY`) for secrets can lead to exposure via process lists, logs, or debugging endpoints in production environments like Docker or Kubernetes.
+**Learning:** Best practices dictate supporting file-based secret injection (e.g., Docker Secrets mounted at `/run/secrets/...`), as reading from memory/files avoids environment variable leakage.
+**Prevention:** Always provide a fallback to read secrets from files (like `API_KEY_FILE`) when configuring applications.
