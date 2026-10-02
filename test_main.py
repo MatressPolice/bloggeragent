@@ -418,14 +418,14 @@ def test_static_cache_no_eviction_under_limit(mock_frontend_dir):
     with open(test_filepath, "w") as f:
         f.write("<html><body>Cache Under Limit Test</body></html>")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")
@@ -452,14 +452,14 @@ def test_static_cache_eviction_non_static(mock_frontend_dir):
     tmpdir = str(mock_frontend_dir.parent)
     test_filename = f"nonexistent_{uuid.uuid4().hex}.html"
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")
