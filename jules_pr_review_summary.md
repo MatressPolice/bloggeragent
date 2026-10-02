@@ -2,16 +2,36 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 11):** 7 of 15 PRs resolved (#116 - #122 resolved; 8 remaining in batch: #123 - #130)  
-**Total PRs Resolved to Date:** 90 PRs across Batches 1–11  
-**Total Remaining Open PRs in Repo:** 10 PRs (#123 - #132)
+**Status:** 🎉 Complete — 100% of PRs reviewed and resolved!  
+**Total PRs Resolved to Date:** 110 PRs across Batches 1–12 (#33 – #142)  
+**Total Remaining Open PRs in Repo:** 0 PRs  
 
 ---
 
-## Batch 11 Review & Resolution Table (In Progress)
+## Batch 12 Completed PRs (#131 - #142) [Final Batch - 100% Repository Completion]
 
 | PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
-| :---: | :--- | :--- | :--- | :--- | :---: |
+| :---: | :--- | :--- | :--- | :--- | :--- | :---: |
+| **#131** | 🎨 Palette: Improve empty form submission UX | `palette-empty-state-ux-2760272115847903462` | Added explicit error banner feedback when submitting empty or whitespace-only topic in `frontend/index.html` preventing silent dead-clicks; consolidated Palette UX learnings in `.jules/palette.md`. | ✅ 36/36 Tests Passing | ✅ Archived ([`2760272115847903462`](https://jules.google.com/task/2760272115847903462)) |
+| **#132** | 🛡️ Sentinel: [CRITICAL] Fix path traversal bypass via symlinks | `fix-path-traversal-symlinks-9781780029176316859` | Replaced `os.path.abspath` with `os.path.realpath` in `main.py` to prevent symlink traversal attacks, defined `FRONTEND_DIR_REALPATH_PREFIX`, renamed performance test to `test_performance_realpath.py`, and updated test fixtures. | ✅ 36/36 Tests Passing | ✅ Archived ([`9781780029176316859`](https://jules.google.com/task/9781780029176316859)) |
+| **#133** | 🧹 Code Health: Acknowledge superseded PR for unused RunConfig import | `jules-12710531307445181533-35e124c4` | Closed as superseded (0 diff). Unused `RunConfig` import was already removed in PR #80; task archived. | ℹ️ Superseded by PR #80 | ✅ Archived ([`12710531307445181533`](https://jules.google.com/task/12710531307445181533)) |
+| **#134** | 🧹 Code Health: Resolve duplication in test_agent.py | `fix-test-duplication-3093059583103932022` | Closed as superseded (0 diff). Test deduplication helper `_run_loop_agent_integration_test` was already merged in PR #115; task archived. | ℹ️ Superseded by PR #115 | ✅ Archived ([`3093059583103932022`](https://jules.google.com/task/3093059583103932022)) |
+| **#135** | 🧹 Code Health: Remove unused imports in test_agent.py | `fix-unused-imports-final-17816194915505023471` | Cleaned unused top-level imports (`Event`, `EventActions`, `InMemorySessionService`) from `test_agent.py`. | ✅ 36/36 Tests Passing | ✅ Archived ([`17816194915505023471`](https://jules.google.com/task/17816194915505023471)) |
+| **#136** | 🔒 Sentinel: [Medium] Fix insecure wildcard CORS configuration | `fix/cors-wildcard-5602302574700322453` | Hardened CORS validation in `main.py` to reject wildcard subdomains (e.g. `https://*.example.com`), added test `test_insecure_cors_origins_wildcard_raises_error`, and documented in `.jules/sentinel.md`. | ✅ 37/37 Tests Passing | ✅ Archived ([`5602302574700322453`](https://jules.google.com/task/5602302574700322453)) |
+| **#137** | 🛡️ Sentinel: [MEDIUM] Fix unhandled exception with non-ASCII tokens in authentication | `fix-auth-token-encoding-17216123528054457899` | Encoded `token` and `api_key` to UTF-8 bytes before calling `secrets.compare_digest()` in `main.py`, preventing unhandled `TypeError` / 500 crashes on non-ASCII tokens; added test `test_auth_middleware_with_non_ascii_token`. | ✅ 38/38 Tests Passing | ✅ Archived ([`17216123528054457899`](https://jules.google.com/task/17216123528054457899)) |
+| **#138** | 🧪 [testing improvement] Add missing API_KEY test assertions | `test-missing-api-key-16320085684680281271` | Closed as incompatible. Attempted to revert generic `Unauthorized` security fix from PR #92 back to verbose information disclosure; task archived. | ℹ️ Incompatible / Revert | ✅ Archived ([`16320085684680281271`](https://jules.google.com/task/16320085684680281271)) |
+| **#139** | ⚡ Bolt: Dynamic date evaluation in agent instructions | `jules-4153198614507498622-41116ffa` | Closed as redundant. Dynamic date evaluation was already cleanly implemented via `get_blogger_instruction` in PR #118; task archived. | ℹ️ Superseded by PR #118 | ✅ Archived ([`4153198614507498622`](https://jules.google.com/task/4153198614507498622)) |
+| **#140** | 🧹 [code health improvement] Remove unused imports from test_agent.py | `jules-17602072328915720251-56687542` | Closed as redundant. Unused imports in `test_agent.py` were already removed in PR #135; task archived. | ℹ️ Superseded by PR #135 | ✅ Archived ([`17602072328915720251`](https://jules.google.com/task/17602072328915720251)) |
+| **#141** | 🧪 Add edge case and negative tests for static cache eviction | `add-cache-edge-case-tests-11545530968698110615` | Added comprehensive edge case tests `test_static_cache_no_eviction_under_limit` and `test_static_cache_eviction_non_static` in `test_main.py` using `mock_realpath`. | ✅ 40/40 Tests Passing | ✅ Archived ([`11545530968698110615`](https://jules.google.com/task/11545530968698110615)) |
+| **#142** | ⚡ Bolt: Use synchronous os.path.isfile for static file checks | `perf-optimize-isfile-16117288103511684968` | Closed as incompatible. Removing `asyncio.to_thread` introduces blocking I/O into the ASGI event loop and branch conflicted with symlink traversal fix in PR #132; task archived. | ℹ️ Incompatible / Blocking I/O | ✅ Archived ([`16117288103511684968`](https://jules.google.com/task/16117288103511684968)) |
+
+---
+
+<details>
+<summary><b>Batch 11 Completed PRs (#116 - #130) [Expand]</b></summary>
+
+| PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
+| :---: | :--- | :--- | :--- | :--- | :--- | :---: |
 | **#116** | 🧪 Add static cache limit test | `test-static-cache-limit-17594963495813254590` | Closed as redundant. The `_STATIC_CACHE` limit eviction test `test_static_cache_eviction` was already added in PR #85; branch deleted and task archived. | ℹ️ Superseded by PR #85 | ✅ Archived ([`17594963495813254590`](https://jules.google.com/task/17594963495813254590)) |
 | **#117** | 🔒 Prevent insecure CORS wildcard configuration | `sentinel-cors-fix-15376999776605566453` | Added security validation in `main.py` raising a `ValueError` if `'*'` wildcard is detected in `ALLOWED_ORIGINS`; added test `test_insecure_cors_origins_raises_error` and documented learnings in `.jules/sentinel.md`. | ✅ 34/34 Tests Passing | ✅ Archived ([`15376999776605566453`](https://jules.google.com/task/15376999776605566453)) |
 | **#118** | ⚡ Bolt: dynamic instruction evaluation for root agent | `perf-opt-agent-instruction-4963148321419641522` | Refactored static f-string in `agent.py` to dynamic callable `get_blogger_instruction`, deferring evaluation to runtime and reducing import-time overhead; removed scratch benchmark script; documented learnings in `.jules/bolt.md`. | ✅ 34/34 Tests Passing | ✅ Archived ([`4963148321419641522`](https://jules.google.com/task/4963148321419641522)) |
@@ -19,21 +39,16 @@
 | **#120** | 🧪 Improve test for missing API_KEY variable | `fix-auth-test-11305807947007655493` | Closed as incompatible/obsolete. PR #92 replaced verbose error detail with generic `Unauthorized` to fix information disclosure; branch deleted and task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`11305807947007655493`](https://jules.google.com/task/11305807947007655493)) |
 | **#121** | 🛡️ Sentinel: [Medium] Fix Potential Path Traversal in Static File Serving | `sentinel-path-traversal-fix-15307754076813143961` | Closed as superseded by PR #132 which comprehensively updates `realpath` symlink handling and test mocking; branch deleted and task archived. | ℹ️ Superseded by PR #132 | ✅ Archived ([`15307754076813143961`](https://jules.google.com/task/15307754076813143961)) |
 | **#122** | 🧪 Add direct unit test for no_frontend fallback | `jules-testing-improvement-fallback-12461218026795367011` | Closed as redundant/incompatible. PR #92 changed `no_frontend` to return 404 `Not Found`, which is already covered by `test_no_frontend_endpoint`; branch deleted and task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`12461218026795367011`](https://jules.google.com/task/12461218026795367011)) |
+| **#123** | ⚡ Bolt: Remove asyncio.to_thread overhead for static file caching | `bolt-optimize-isfile-9419384019469411855` | Closed as incompatible. Non-blocking I/O via `asyncio.to_thread` is required in ASGI middleware to prevent event loop stalls; branch also conflicted with information disclosure hardening; task archived. | ℹ️ Incompatible / Blocking I/O | ✅ Archived ([`9419384019469411855`](https://jules.google.com/task/9419384019469411855)) |
+| **#124** | ⚡ Bolt: Fast path cache checking before unquote/posixpath parsing | `optimize-middleware-parsing-5511439840380676761` | Closed as vulnerable/incompatible. Re-introduced `unquote`/`posixpath.normpath` authentication bypass (`/protected%2f..%2fhealth`); task archived. | ℹ️ Security Vulnerability | ✅ Archived ([`5511439840380676761`](https://jules.google.com/task/5511439840380676761)) |
+| **#125** | 🎨 Palette: Improve screen reader experience for theme toggle | `palette/a11y-theme-toggle-2562986912351349788` | Closed as redundant. Decorative emojis wrapped in `aria-hidden` spans and dynamic `aria-label` updates were already implemented in PR #73 / PR #75; task archived. | ℹ️ Superseded by PR #73/#75 | ✅ Archived ([`2562986912351349788`](https://jules.google.com/task/2562986912351349788)) |
+| **#126** | 🛡️ Sentinel: [MEDIUM] Fix information disclosure in API failure response | `sentinel-fix-info-disclosure-18177378506008385732` | Closed as redundant. Generic `Unauthorized` response on missing API key was already merged in PR #92; task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`18177378506008385732`](https://jules.google.com/task/18177378506008385732)) |
+| **#127** | ⚡ Bolt: Add fast-path cache lookup in middleware | `fast-path-opt-3589860745706102538` | Closed as vulnerable/incompatible. Re-introduced `unquote`/`posixpath.normpath` authentication bypass; task archived. | ℹ️ Security Vulnerability | ✅ Archived ([`3589860745706102538`](https://jules.google.com/task/3589860745706102538)) |
+| **#128** | 🎨 Palette: Add aria-hidden to theme toggle emoji | `palette-a11y-theme-7884123868924700175` | Closed as redundant. Superseded by PR #73 / PR #75 which already wrapped theme toggle emojis in `aria-hidden` spans; task archived. | ℹ️ Superseded by PR #73/#75 | ✅ Archived ([`7884123868924700175`](https://jules.google.com/task/7884123868924700175)) |
+| **#129** | 🛡️ Sentinel: [MEDIUM] Fix information disclosure in API Key validation | `fix-auth-disclosure-11301553852523532719` | Closed as redundant. Addressed in PR #92 which returns generic `Unauthorized`; task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`11301553852523532719`](https://jules.google.com/task/11301553852523532719)) |
+| **#130** | ⚡ Bolt: Add fast-path raw path lookup for static file cache | `bolt-fast-path-cache-16365080662021345731` | Closed as redundant. Adding raw path lookup before an inexpensive `startswith('//')` check creates dual hash lookups that penalize cache misses and API routes; task archived. | ℹ️ Redundant | ✅ Archived ([`16365080662021345731`](https://jules.google.com/task/16365080662021345731)) |
 
----
-
-## Remaining Open PRs (#123 - #132)
-
-- **PR #123**: `⚡ Bolt: Remove asyncio.to_thread overhead for static file caching`
-- **PR #124**: `⚡ Bolt: Fast path cache checking before unquote/posixpath parsing`
-- **PR #125**: `🎨 Palette: Improve screen reader experience for theme toggle`
-- **PR #126**: `🛡️ Sentinel: [MEDIUM] Fix information disclosure in API failure response`
-- **PR #127**: `⚡ Bolt: Add fast-path cache lookup in middleware`
-- **PR #128**: `🎨 Palette: Add aria-hidden to theme toggle emoji`
-- **PR #129**: `🛡️ Sentinel: [MEDIUM] Fix information disclosure in API Key validation`
-- **PR #130**: `⚡ Bolt: Add fast-path raw path lookup for static file cache`
-- **PR #131**: `🎨 Palette: Improve empty form submission UX`
-- **PR #132**: `🛡️ Sentinel: [CRITICAL] Fix path traversal bypass via symlinks`
+</details>
 
 ---
 
