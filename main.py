@@ -1,8 +1,6 @@
 import os
 import asyncio
 import secrets
-import posixpath
-from urllib.parse import unquote
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -61,15 +59,15 @@ async def verify_api_key(request: Request, call_next):
     # to avoid the overhead of constructing a URL object and parsing it on every request.
     raw_path = request.scope.get("path", "")
 
-    # Fast path for public routes without unquote/normpath overhead
+    # Fast path for public routes without normalization overhead
     if raw_path in PUBLIC_PATHS:
         return await call_next(request)
 
-    norm_path = posixpath.normpath(unquote(raw_path))
+    norm_path = raw_path
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
 
-    # If this route is meant to be public (but was encoded/messy), skip auth
+    # If this route is meant to be public, skip auth
     if norm_path in PUBLIC_PATHS:
         return await call_next(request)
 
