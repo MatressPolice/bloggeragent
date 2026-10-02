@@ -5,7 +5,7 @@ def check_file():
     with open("main.py", "r") as f:
         tree = ast.parse(f.read(), filename="main.py")
 
-    class AbspathVisitor(ast.NodeVisitor):
+    class RealpathVisitor(ast.NodeVisitor):
         def __init__(self):
             self.found_in_middleware = False
             self.in_verify_api_key = False
@@ -20,22 +20,22 @@ def check_file():
 
         def visit_Call(self, node):
             if self.in_verify_api_key:
-                # check for os.path.abspath(FRONTEND_DIR)
-                if isinstance(node.func, ast.Attribute) and node.func.attr == 'abspath':
+                # check for os.path.realpath(FRONTEND_DIR)
+                if isinstance(node.func, ast.Attribute) and node.func.attr == 'realpath':
                     if isinstance(node.func.value, ast.Attribute) and node.func.value.attr == 'path':
                         if isinstance(node.func.value.value, ast.Name) and node.func.value.value.id == 'os':
                             if len(node.args) == 1 and isinstance(node.args[0], ast.Name) and node.args[0].id == 'FRONTEND_DIR':
                                 self.found_in_middleware = True
             self.generic_visit(node)
 
-    visitor = AbspathVisitor()
+    visitor = RealpathVisitor()
     visitor.visit(tree)
 
     if visitor.found_in_middleware:
-        print("ERROR: os.path.abspath(FRONTEND_DIR) found in verify_api_key middleware.")
+        print("ERROR: os.path.realpath(FRONTEND_DIR) found in verify_api_key middleware.")
         sys.exit(1)
     else:
-        print("SUCCESS: os.path.abspath(FRONTEND_DIR) not found in verify_api_key middleware.")
+        print("SUCCESS: os.path.realpath(FRONTEND_DIR) not found in verify_api_key middleware.")
         sys.exit(0)
 
 if __name__ == "__main__":

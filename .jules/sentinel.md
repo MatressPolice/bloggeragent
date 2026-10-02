@@ -37,3 +37,9 @@
 **Vulnerability:** Relying solely on environment variables (`API_KEY`) for secrets can lead to exposure via process lists, logs, or debugging endpoints in production environments like Docker or Kubernetes.
 **Learning:** Best practices dictate supporting file-based secret injection (e.g., Docker Secrets mounted at `/run/secrets/...`), as reading from memory/files avoids environment variable leakage.
 **Prevention:** Always provide a fallback to read secrets from files (like `API_KEY_FILE`) when configuring applications.
+
+## 2026-10-02 - [Fix Path Traversal bypass via symlinks]
+**Vulnerability:** The static file serving logic in `verify_api_key` middleware validated paths using `os.path.abspath()`. This fails to resolve symbolic links properly, potentially allowing attackers to supply paths with symlinks that bypass the prefix-checking boundary and exploit path traversal, leaking sensitive system or application files.
+**Learning:** Using `os.path.abspath()` is insufficient for securely verifying if a user-provided file path falls strictly within a designated safe directory when symbolic links are involved.
+**Prevention:** Always use `os.path.realpath()` instead of `os.path.abspath()` when validating that a requested path remains within a safe base directory to properly resolve symlinks and prevent path traversal vulnerabilities.
+
