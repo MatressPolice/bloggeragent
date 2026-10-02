@@ -2,25 +2,25 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 8):** 5 of 15 PRs resolved (10 remaining)
+**Current Batch (Batch 8):** 6 of 15 PRs resolved (9 remaining)
 
 ---
 
 ## Batch 8 Review & Resolution Table
 
 | PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
-| :---: | :--- | :--- | :--- | :---: | :---: |
+| :---: | :--- | :--- | :--- | :--- | :---: |
 | **#71** | ⚡ Bolt: [Fast-path check for public routes in auth middleware] | `bolt-fast-path-middleware-6096725466869415758` | Added fast-path early exit for `PUBLIC_PATHS` directly on `raw_path` in `verify_api_key` in `main.py`, bypassing normalization and unquote logic; cleaned scratch files and updated `.jules/bolt.md`. | ✅ 32/32 Tests Passing | ✅ Archived ([`6096725466869415758`](https://jules.google.com/task/6096725466869415758)) |
 | **#72** | 🛡️ Sentinel: Add Content-Security-Policy header | `sentinel-csp-header-14118116586921044643` | Added Content-Security-Policy (CSP) header to `add_security_headers` middleware in `main.py` allowing trusted CDNs and inline scripts/styles; updated security headers test in `test_main.py` and documented learnings in `.jules/sentinel.md`. | ✅ 32/32 Tests Passing | ✅ Archived ([`14118116586921044643`](https://jules.google.com/task/14118116586921044643)) |
 | **#73** | 🎨 Palette: Add character counter and dynamic ARIA label | `palette/ux-improvements-15526616950228399060` | Added live character counter (`0/200`) linked with `aria-describedby` to blog topic input in `frontend/index.html`; dynamically updated `aria-label` on theme toggle button; documented learnings in `.Jules/palette.md`. | ✅ 32/32 Tests Passing | ✅ Archived ([`15526616950228399060`](https://jules.google.com/task/15526616950228399060)) |
 | **#74** | 🛡️ Sentinel: Add Content-Security-Policy header | `sentinel-add-csp-header-7998342156215288058` | Closed as redundant. CSP header with required CDN and Google Fonts origins was already integrated in PR #72; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`7998342156215288058`](https://jules.google.com/task/7998342156215288058)) |
 | **#75** | 🎨 Palette: Enhance accessibility for progress stepper and icons | `palette-a11y-enhancements-3768533463483403434` | Added `aria-hidden="true"` to decorative emojis/icons, added list semantics (`role="list"`/`role="listitem"`) and dynamic `aria-current="step"` to stepper in `frontend/index.html`; combined learnings in `.Jules/palette.md`. | ✅ 32/32 Tests Passing | ✅ Archived ([`3768533463483403434`](https://jules.google.com/task/3768533463483403434)) |
+| **#76** | ⚡ Bolt: [Early exit fast-path for public endpoints] | `jules-9596411366570000439-8019c3b1` | Closed as redundant. Fast-path check for `PUBLIC_PATHS` without normalization overhead was already implemented in PR #71; branch deleted and task archived. | ℹ️ Superseded by PR #71 | ✅ Archived ([`9596411366570000439`](https://jules.google.com/task/9596411366570000439)) |
 
 ---
 
 ## Remaining Open PRs in Batch 8 (15 PR Target: #71 - #85)
 
-- **PR #76**: `⚡ Bolt: [Early exit fast-path for public endpoints]`
 - **PR #77**: `🛡️ Sentinel: Add Content-Security-Policy defense-in-depth`
 - **PR #78**: `⚡ Bolt: Add fast-path early exit for public routes`
 - **PR #79**: `🎨 Palette: Improve stepper accessibility`
