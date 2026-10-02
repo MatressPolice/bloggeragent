@@ -32,3 +32,8 @@
 **Vulnerability:** The application allowed the use of '*' in the ALLOWED_ORIGINS environment variable, which could permit cross-origin requests from any domain, compromising sensitive user data.
 **Learning:** External configuration variables that control security policies (such as CORS origins) must be explicitly validated and sanitized in the application code to prevent unsafe values from being accepted.
 **Prevention:** Add an explicit check in `main.py` to raise a ValueError if '*' is present in the `allow_origins` list derived from the `ALLOWED_ORIGINS` environment variable.
+
+## 2026-09-29 - [Support file-based secrets for API Key]
+**Vulnerability:** Relying solely on environment variables (`API_KEY`) for secrets can lead to exposure via process lists, logs, or debugging endpoints in production environments like Docker or Kubernetes.
+**Learning:** Best practices dictate supporting file-based secret injection (e.g., Docker Secrets mounted at `/run/secrets/...`), as reading from memory/files avoids environment variable leakage.
+**Prevention:** Always provide a fallback to read secrets from files (like `API_KEY_FILE`) when configuring applications.

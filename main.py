@@ -7,7 +7,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.gzip import GZipMiddleware
 from google.adk.cli.fast_api import get_fast_api_app
 
-API_KEY = os.getenv("API_KEY")
+def _get_api_key():
+    key = os.getenv("API_KEY")
+    if not key:
+        key_file = os.getenv("API_KEY_FILE")
+        if key_file and os.path.isfile(key_file):
+            with open(key_file, "r") as f:
+                key = f.read().strip()
+    return key
+
+API_KEY = _get_api_key()
 
 # Point to the directory containing your agent package
 AGENT_DIR = os.path.dirname(os.path.abspath(__file__))

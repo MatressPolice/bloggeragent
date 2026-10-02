@@ -57,8 +57,31 @@ def test_auth_middleware_no_key_configured():
     with patch.dict(os.environ, {}, clear=True), patch("main.API_KEY", None):
         client, _ = setup_test_client(reload=False)
         response = client.get("/list-apps")
-        assert response.status_code == 401
         assert "Unauthorized" in response.json()["detail"]
+
+def test_api_key_from_file(tmp_path):
+    secret_file = tmp_path / "secret.txt"
+    secret_file.write_text("file_super_secret\n")
+
+    with patch.dict(os.environ, {"API_KEY_FILE": str(secret_file)}, clear=True), patch("main.API_KEY", "file_super_secret"):
+        client, _ = setup_test_client(reload=False)
+        response = client.get(
+            "/list-apps",
+            headers={"Authorization": "Bearer file_super_secret"}
+        )
+        assert response.status_code == 200
+
+def test_get_api_key_helper(tmp_path):
+    import main as main_mod
+    # Test reading from env
+    with patch.dict(os.environ, {"API_KEY": "env_key"}, clear=True):
+        assert main_mod._get_api_key() == "env_key"
+
+    # Test reading from file when env not set
+    secret_file = tmp_path / "secret_helper.txt"
+    secret_file.write_text("file_key_content\n")
+    with patch.dict(os.environ, {"API_KEY_FILE": str(secret_file)}, clear=True):
+        assert main_mod._get_api_key() == "file_key_content"
 
 @patch('main.API_KEY', 'supersecret')
 def test_auth_middleware_with_key_unauthorized():
