@@ -1,8 +1,6 @@
 import os
 import asyncio
 import secrets
-import posixpath
-from urllib.parse import unquote
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -48,6 +46,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; connect-src 'self'"
     return response
 
 @app.middleware("http")
@@ -58,7 +57,13 @@ async def verify_api_key(request: Request, call_next):
 
     # ⚡ Bolt Optimization: Use request.scope.get("path") instead of request.url.path
     # to avoid the overhead of constructing a URL object and parsing it on every request.
-    norm_path = posixpath.normpath(unquote(request.scope.get("path", "")))
+    raw_path = request.scope.get("path", "")
+
+    # Fast path for public routes without normalization overhead
+    if raw_path in PUBLIC_PATHS:
+        return await call_next(request)
+
+    norm_path = raw_path
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
 
