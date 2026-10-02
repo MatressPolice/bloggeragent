@@ -2,7 +2,7 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 8):** 14 of 15 PRs resolved (1 remaining)
+**Current Batch (Batch 8):** 15 of 15 PRs resolved (0 remaining) - Batch 8 Complete!
 
 ---
 
@@ -24,12 +24,13 @@
 | **#82** | 🧹 Remove unused ToolContext import | `code-health/remove-toolcontext-9500689771068259023` | Removed unused `ToolContext` import from `test_agent.py` to keep test module imports clean. | ✅ 32/32 Tests Passing | ✅ Archived ([`9500689771068259023`](https://jules.google.com/task/9500689771068259023)) |
 | **#83** | 🧹 Remove unused Session import | `code-health-remove-session-import-13479518909678935865` | Removed unused `Session` import from `test_agent.py` to keep test module imports clean. | ✅ 32/32 Tests Passing | ✅ Archived ([`13479518909678935865`](https://jules.google.com/task/13479518909678935865)) |
 | **#84** | 🧹 Refactor: Extract AST visitors | `code-health-refactor-4916705752591163559` | Extracted nested AST visitors (`NestedWithVisitor`, `RedundantAbspathVisitor`) in `test_code_health.py` to module scope for cleaner test structure and reusability. | ✅ 32/32 Tests Passing | ✅ Archived ([`4916705752591163559`](https://jules.google.com/task/4916705752591163559)) |
+| **#85** | 🧪 Add test for static cache eviction | `test-improvement-16735733374609975474` | Added unit test `test_static_cache_eviction` in `test_main.py` verifying that when `_STATIC_CACHE` hits `_MAX_CACHE_SIZE` (1000 items), subsequent requests evict/clear the cache to prevent unbounded memory growth. | ✅ 33/33 Tests Passing | ✅ Archived ([`16735733374609975474`](https://jules.google.com/task/16735733374609975474)) |
 
 ---
 
-## Remaining Open PRs in Batch 8 (15 PR Target: #71 - #85)
+## Batch 8 Complete (All 15 PRs Resolved)
 
-- **PR #85**: `🧪 Add test for static cache eviction`
+Next batch (Batch 9) target: **PR #86 - #100** (15 PRs).
 
 ---
 
