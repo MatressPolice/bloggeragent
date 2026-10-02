@@ -25,3 +25,7 @@
 ## 2026-09-17 - Fast-path check for public routes in auth middleware
 **Learning:** Checking a raw path string directly against a set is roughly ~90% faster than normalizing it via `posixpath.normpath(unquote(path))` beforehand. Since the vast majority of API requests use standard, unencoded paths matching standard public routes exactly, parsing paths unconditionally adds cumulative CPU overhead.
 **Action:** When implementing path-based checks, always evaluate the exact raw path first as an early exit "fast-path" before executing expensive decoding/normalization logic for edge cases.
+
+## 2026-09-17 - Fast-path cache lookup for static files
+**Learning:** Checking the `_STATIC_CACHE` using the raw path before path normalization avoids string manipulation overhead (e.g., `startswith("//")` and `lstrip`) for the vast majority of well-formed static file requests. This fast path reduces latency for cached static files.
+**Action:** When using a cache in middleware where the key is a normalized path, add a preliminary "fast-path" check using the raw, unnormalized path if the raw path usually matches the normalized path.

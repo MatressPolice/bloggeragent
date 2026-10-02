@@ -63,6 +63,13 @@ async def verify_api_key(request: Request, call_next):
     if raw_path in PUBLIC_PATHS:
         return await call_next(request)
 
+    # ⚡ Bolt Optimization: Fast path static cache lookup using raw path
+    # bypasses normalization overhead for already cached well-formed static routes.
+    if FRONTEND_DIR_EXISTS:
+        is_static_fast = _STATIC_CACHE.get(raw_path)
+        if is_static_fast:
+            return await call_next(request)
+
     norm_path = raw_path
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
