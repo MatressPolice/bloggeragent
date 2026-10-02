@@ -88,7 +88,7 @@ async def verify_api_key(request: Request, call_next):
         is_static = _STATIC_CACHE.get(norm_path)
         if is_static is None:
             file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-            is_static = os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and os.path.isfile(file_path)
+            is_static = os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
 
             if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
                 _STATIC_CACHE.clear()
