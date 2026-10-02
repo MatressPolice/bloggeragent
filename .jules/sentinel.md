@@ -37,8 +37,23 @@
 **Vulnerability:** Relying solely on environment variables (`API_KEY`) for secrets can lead to exposure via process lists, logs, or debugging endpoints in production environments like Docker or Kubernetes.
 **Learning:** Best practices dictate supporting file-based secret injection (e.g., Docker Secrets mounted at `/run/secrets/...`), as reading from memory/files avoids environment variable leakage.
 **Prevention:** Always provide a fallback to read secrets from files (like `API_KEY_FILE`) when configuring applications.
+## 2026-10-02 - [Fix Path Traversal bypass via symlinks]
+**Vulnerability:** The static file serving logic in `verify_api_key` middleware validated paths using `os.path.abspath()`. This fails to resolve symbolic links properly, potentially allowing attackers to supply paths with symlinks that bypass the prefix-checking boundary and exploit path traversal, leaking sensitive system or application files.
+**Learning:** Using `os.path.abspath()` is insufficient for securely verifying if a user-provided file path falls strictly within a designated safe directory when symbolic links are involved.
+**Prevention:** Always use `os.path.realpath()` instead of `os.path.abspath()` when validating that a requested path remains within a safe base directory to properly resolve symlinks and prevent path traversal vulnerabilities.
+
+## 2026-10-02 - Fix insecure wildcard CORS configuration
+**Vulnerability:** The initial implementation checked if the exact string `"*"` was in the list of allowed origins, which permitted origins with wildcards (e.g. `https://*.example.com`).
+**Learning:** Using an exact string match for wildcards in security policies can easily be bypassed by permutations of the wildcard.
+**Prevention:** Iterating through each origin and checking for the presence of the wildcard character (`*` in substring) correctly enforces strict policies and blocks any wildcard permutations.
+
+## 2026-10-02 - Unhandled TypeError in secrets.compare_digest
+**Vulnerability:** Passing non-ASCII strings to `secrets.compare_digest()` raises an unhandled `TypeError`, which bypasses normal error handling (returning a 500 instead of a 401) and presents a Denial of Service (DoS) vector if exploited heavily.
+**Learning:** `secrets.compare_digest()` strictly enforces ASCII when given strings and will throw an exception if given unicode characters like emojis.
+**Prevention:** Always encode user-provided input and expected secret strings to bytes (e.g., `.encode("utf-8")`) before passing them to cryptographic comparison functions to ensure safe and deterministic behavior regardless of character sets.
 
 ## 2026-10-02 - [Fix API Key Environment Exposure]
 **Vulnerability:** The application was keeping sensitive environment variables like `API_KEY` in `os.environ` after retrieving them during initialization. This creates a risk where secrets could be accidentally logged by third-party packages, exposed via debug endpoints, or leaked to spawned child processes.
 **Learning:** Leaving secrets in the process environment after they are loaded into application state unnecessarily expands the blast radius of potential information disclosure vulnerabilities.
 **Prevention:** Always use `os.environ.pop()` instead of `os.getenv()` when reading sensitive configuration at startup to ensure the secrets are immediately cleared from the environment variables array.
+

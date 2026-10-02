@@ -24,14 +24,14 @@ def setup_test_client(reload=False):
 def test_frontend_static_mount(mock_frontend_dir):
     tmpdir = str(mock_frontend_dir.parent)
 
-    # Patch os.path.abspath so that main.AGENT_DIR becomes tmpdir without changing signature
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    # Patch os.path.realpath so that main.AGENT_DIR becomes tmpdir without changing signature
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
-    with patch("os.path.abspath", side_effect=mock_abspath):
+    with patch("os.path.realpath", side_effect=mock_realpath):
         client, _ = setup_test_client(reload=True)
         response = client.get("/")
 
@@ -220,14 +220,14 @@ def test_auth_middleware_path_traversal_static(mock_frontend_dir):
     with open(os.path.join(tmpdir, "frontend-secret.txt"), "w") as f:
         f.write("secret")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")
@@ -281,11 +281,11 @@ def test_default_cors_origins():
 
     assert main_mod.allow_origins == []
 
-def test_frontend_dir_abspath_prefix_performance_optimization():
-    """Verify that the module-level FRONTEND_DIR_ABSPATH_PREFIX optimization is in place."""
-    expected_prefix = os.path.abspath(main.FRONTEND_DIR) + os.path.sep
-    assert main.FRONTEND_DIR_ABSPATH_PREFIX == expected_prefix, (
-        "FRONTEND_DIR_ABSPATH_PREFIX must be calculated at module level "
+def test_frontend_dir_realpath_prefix_performance_optimization():
+    """Verify that the module-level FRONTEND_DIR_REALPATH_PREFIX optimization is in place."""
+    expected_prefix = os.path.realpath(main.FRONTEND_DIR) + os.path.sep
+    assert main.FRONTEND_DIR_REALPATH_PREFIX == expected_prefix, (
+        "FRONTEND_DIR_REALPATH_PREFIX must be calculated at module level "
         "to avoid redundant abspath calculations in the middleware."
     )
 
@@ -297,14 +297,14 @@ def test_static_file_auth_bypass_success(mock_frontend_dir):
     with open(test_filepath, "w") as f:
         f.write("<html><body>Bypass Test</body></html>")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")
@@ -355,14 +355,14 @@ def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
     with open(test_filepath, "w") as f:
         f.write("<html><body>Perf Test</body></html>")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret"),
@@ -387,14 +387,14 @@ def test_static_cache_eviction(mock_frontend_dir):
     with open(test_filepath, "w") as f:
         f.write("<html><body>Cache Test</body></html>")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")
@@ -418,7 +418,99 @@ def test_static_cache_eviction(mock_frontend_dir):
         assert main_mod._STATIC_CACHE[f"/{test_filename}"] is True
 
 
+def test_static_cache_no_eviction_under_limit(mock_frontend_dir):
+    tmpdir = str(mock_frontend_dir.parent)
+    test_filename = f"test_cache_under_{uuid.uuid4().hex}.html"
+    test_filepath = os.path.join(str(mock_frontend_dir), test_filename)
+
+    with open(test_filepath, "w") as f:
+        f.write("<html><body>Cache Under Limit Test</body></html>")
+
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_realpath(path)
+
+    with (
+        patch("os.path.realpath", side_effect=mock_realpath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
+        client, main_mod = setup_test_client(reload=True)
+
+        # Pre-fill cache to one less than max size
+        main_mod._STATIC_CACHE.clear()
+        for i in range(main_mod._MAX_CACHE_SIZE - 1):
+            main_mod._STATIC_CACHE[f"/dummy_{i}.html"] = True
+
+        assert len(main_mod._STATIC_CACHE) == main_mod._MAX_CACHE_SIZE - 1
+
+        # Request a new static file that is not in the cache
+        response = client.get(f"/{test_filename}")
+        assert response.status_code == 200
+
+        # Cache should NOT have been evicted
+        assert len(main_mod._STATIC_CACHE) == main_mod._MAX_CACHE_SIZE
+        assert f"/{test_filename}" in main_mod._STATIC_CACHE
+        assert main_mod._STATIC_CACHE[f"/{test_filename}"] is True
+
+def test_static_cache_eviction_non_static(mock_frontend_dir):
+    tmpdir = str(mock_frontend_dir.parent)
+    test_filename = f"nonexistent_{uuid.uuid4().hex}.html"
+
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
+            return os.path.join(tmpdir, "main.py")
+        return real_realpath(path)
+
+    with (
+        patch("os.path.realpath", side_effect=mock_realpath),
+        patch("main.AGENT_DIR", tmpdir),
+        patch.dict(os.environ, {"API_KEY": "supersecret"}),
+        patch("main.API_KEY", "supersecret")
+    ):
+        client, main_mod = setup_test_client(reload=True)
+
+        # Pre-fill cache to max size
+        main_mod._STATIC_CACHE.clear()
+        for i in range(main_mod._MAX_CACHE_SIZE):
+            main_mod._STATIC_CACHE[f"/dummy_{i}.html"] = True
+
+        assert len(main_mod._STATIC_CACHE) == main_mod._MAX_CACHE_SIZE
+
+        # Request a non-existent file
+        response = client.get(f"/{test_filename}")
+        assert response.status_code == 401
+
+        # Cache should have been evicted and now only contain the new file with False
+        assert len(main_mod._STATIC_CACHE) == 1
+        assert f"/{test_filename}" in main_mod._STATIC_CACHE
+        assert main_mod._STATIC_CACHE[f"/{test_filename}"] is False
+
+
 @patch.dict(os.environ, {"ALLOWED_ORIGINS": "*"})
 def test_insecure_cors_origins_raises_error():
     with pytest.raises(ValueError, match=r"Insecure CORS configuration: '\*' is not allowed in ALLOWED_ORIGINS."):
         importlib.reload(main)
+
+@patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://*.example.com"})
+def test_insecure_cors_origins_wildcard_raises_error():
+    with pytest.raises(ValueError, match=r"Insecure CORS configuration: '\*' is not allowed in ALLOWED_ORIGINS."):
+        importlib.reload(main)
+
+@patch('main.API_KEY', 'supersecret')
+def test_auth_middleware_with_non_ascii_token():
+    client, _ = setup_test_client(reload=False)
+    # Testing timing attack mitigation bug that fails with UnicodeEncodeError/TypeError
+    # by using a non-ASCII token value in the Bearer token.
+    # We must use raw bytes because httpx attempts to ascii-encode string headers by default.
+    response = client.get(
+        "/list-apps",
+        headers={"Authorization": "Bearer 🙈".encode("utf-8")}
+    )
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Unauthorized"
+
