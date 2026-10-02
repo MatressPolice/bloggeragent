@@ -1366,7 +1366,10 @@
       e.preventDefault();
       if (isGenerating) return;
       const topic = topicInput.value.trim();
-      if (!topic) return;
+      if (!topic) {
+        showError("Please enter a topic to generate an article.");
+        return;
+      }
       if (topic.length > 200) {
         showError("Topic is too long. Please limit it to 200 characters.");
         return;
