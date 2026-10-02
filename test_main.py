@@ -414,3 +414,8 @@ def test_static_cache_eviction(mock_frontend_dir):
 def test_insecure_cors_origins_raises_error():
     with pytest.raises(ValueError, match=r"Insecure CORS configuration: '\*' is not allowed in ALLOWED_ORIGINS."):
         importlib.reload(main)
+
+@patch.dict(os.environ, {"ALLOWED_ORIGINS": "https://*.example.com"})
+def test_insecure_cors_origins_wildcard_raises_error():
+    with pytest.raises(ValueError, match=r"Insecure CORS configuration: '\*' is not allowed in ALLOWED_ORIGINS."):
+        importlib.reload(main)
