@@ -3,12 +3,12 @@
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
 **Status:** 🎉 Complete — 100% of PRs reviewed and resolved!  
-**Total PRs Resolved to Date:** 110 PRs across Batches 1–12 (#33 – #142)  
+**Total PRs Resolved to Date:** 111 PRs across Batches 1–12 (#33 – #143)  
 **Total Remaining Open PRs in Repo:** 0 PRs  
 
 ---
 
-## Batch 12 Completed PRs (#131 - #142) [Final Batch - 100% Repository Completion]
+## Batch 12 Completed PRs (#131 - #143) [Final Batch - 100% Repository Completion]
 
 | PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
 | :---: | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -24,6 +24,7 @@
 | **#140** | 🧹 [code health improvement] Remove unused imports from test_agent.py | `jules-17602072328915720251-56687542` | Closed as redundant. Unused imports in `test_agent.py` were already removed in PR #135; task archived. | ℹ️ Superseded by PR #135 | ✅ Archived ([`17602072328915720251`](https://jules.google.com/task/17602072328915720251)) |
 | **#141** | 🧪 Add edge case and negative tests for static cache eviction | `add-cache-edge-case-tests-11545530968698110615` | Added comprehensive edge case tests `test_static_cache_no_eviction_under_limit` and `test_static_cache_eviction_non_static` in `test_main.py` using `mock_realpath`. | ✅ 40/40 Tests Passing | ✅ Archived ([`11545530968698110615`](https://jules.google.com/task/11545530968698110615)) |
 | **#142** | ⚡ Bolt: Use synchronous os.path.isfile for static file checks | `perf-optimize-isfile-16117288103511684968` | Closed as incompatible. Removing `asyncio.to_thread` introduces blocking I/O into the ASGI event loop and branch conflicted with symlink traversal fix in PR #132; task archived. | ℹ️ Incompatible / Blocking I/O | ✅ Archived ([`16117288103511684968`](https://jules.google.com/task/16117288103511684968)) |
+| **#143** | 🧪 Add test for missing frontend directory fallback endpoint | `jules-3877337427645789233-5e18205d` | Closed as superseded (0 diff). Test `test_no_frontend_endpoint` already tests this fallback condition; task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`3877337427645789233`](https://jules.google.com/task/3877337427645789233)) |
 
 ---
 
