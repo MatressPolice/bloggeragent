@@ -9,6 +9,7 @@
 ## 2024-09-17 - Visual Cues for Disabled Inputs
 **Learning:** When a form or specific input field is disabled during background processing (like data generation), leaving it visually identical to its enabled state causes confusion. Users may perceive the app as frozen or broken. Adding clear styling (e.g. reduced opacity, `not-allowed` cursor, dim background) directly addresses this.
 **Action:** Always ensure that dynamically disabled interactive elements, especially inputs used in asynchronous submission flows, have an explicit `:disabled` CSS state to provide immediate visual feedback.
+
 ## 2026-09-18 - Autofocus on Primary Input
 **Learning:** Automatically focusing the primary input field on a single-purpose page reduces friction and improves the overall user experience.
 **Action:** Use the `autofocus` HTML attribute on primary input fields where the immediate user action is expected to be text entry.
@@ -20,3 +21,7 @@
 ## 2026-10-27 - Dynamic ARIA Labels and Inline Feedback
 **Learning:** Bounded inputs (with maxlength) lacking visual feedback create anxiety for users. Simply truncating their typing without a cue is bad UX. Furthermore, icon-only buttons that toggle states (like a theme toggle) often fail accessibility checks if they only use static labels (e.g. "Toggle theme").
 **Action:** Always provide inline, real-time character counters for inputs with enforced length limits so users can adjust behavior before errors. Always use dynamic `aria-label` attributes for toggle buttons that accurately describe the *action* (e.g., "Switch to light theme") instead of describing the generic purpose.
+
+## 2023-10-24 - Add Empty State Validation UI
+**Learning:** For inputs with `required` tags in HTML5, whitespace-only strings bypass native validation and can still be submitted. This can lead to unhandled edge cases in the Javascript processing layer if it relies on `.trim()` without providing user feedback upon failure.
+**Action:** When validating forms, always check the `.trim()` result and provide explicit error messaging (via custom error banners or inline text) if the input evaluates to empty, rather than silently failing and causing user confusion.
