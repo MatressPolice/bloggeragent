@@ -3,12 +3,12 @@
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
 **Status:** 🎉 Complete — 100% of PRs reviewed and resolved!  
-**Total PRs Resolved to Date:** 111 PRs across Batches 1–12 (#33 – #143)  
+**Total PRs Resolved to Date:** 112 PRs across Batches 1–12 (#33 – #144)  
 **Total Remaining Open PRs in Repo:** 0 PRs  
 
 ---
 
-## Batch 12 Completed PRs (#131 - #143) [Final Batch - 100% Repository Completion]
+## Batch 12 Completed PRs (#131 - #144) [Final Batch - 100% Repository Completion]
 
 | PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
 | :---: | :--- | :--- | :--- | :--- | :--- | :---: |
@@ -25,6 +25,7 @@
 | **#141** | 🧪 Add edge case and negative tests for static cache eviction | `add-cache-edge-case-tests-11545530968698110615` | Added comprehensive edge case tests `test_static_cache_no_eviction_under_limit` and `test_static_cache_eviction_non_static` in `test_main.py` using `mock_realpath`. | ✅ 40/40 Tests Passing | ✅ Archived ([`11545530968698110615`](https://jules.google.com/task/11545530968698110615)) |
 | **#142** | ⚡ Bolt: Use synchronous os.path.isfile for static file checks | `perf-optimize-isfile-16117288103511684968` | Closed as incompatible. Removing `asyncio.to_thread` introduces blocking I/O into the ASGI event loop and branch conflicted with symlink traversal fix in PR #132; task archived. | ℹ️ Incompatible / Blocking I/O | ✅ Archived ([`16117288103511684968`](https://jules.google.com/task/16117288103511684968)) |
 | **#143** | 🧪 Add test for missing frontend directory fallback endpoint | `jules-3877337427645789233-5e18205d` | Closed as superseded (0 diff). Test `test_no_frontend_endpoint` already tests this fallback condition; task archived. | ℹ️ Superseded by PR #92 | ✅ Archived ([`3877337427645789233`](https://jules.google.com/task/3877337427645789233)) |
+| **#144** | 🛡️ Sentinel: [Medium] Fix secrets exposed via environment variables | `sentinel-fix-api-key-exposure-001-15433877770122543174` | Used `os.environ.pop()` to clear `API_KEY` and `API_KEY_FILE` immediately upon reading into memory in `main.py`, reducing secret leakage surface area; added unit test `test_api_key_removed_from_env`. | ✅ 41/41 Tests Passing | ✅ Archived ([`15433877770122543174`](https://jules.google.com/task/15433877770122543174)) |
 
 ---
 
