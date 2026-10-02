@@ -27,3 +27,8 @@
 **Vulnerability:** The middleware was manually decoding and normalizing `request.scope.get("path")` with `posixpath.normpath(unquote(...))`. This allowed an attacker to supply paths like `/api/secure/..%2f..%2fhealth` which bypassed authentication because the normalized path mapped to `/health` (a public route), but the application router handled the raw encoded path and routed the request to the secure endpoint.
 **Learning:** Do not use `posixpath.normpath(urllib.parse.unquote(path))` in FastAPI middleware for route validation. This creates path resolution mismatches with the underlying router.
 **Prevention:** Use raw `request.scope.get("path", "")` directly for validation, as FastAPI handles normalization consistently internally.
+
+## 2026-10-02 - [Fix Path Traversal bypass via symlinks]
+**Vulnerability:** The static file serving logic in `verify_api_key` middleware validated paths using `os.path.abspath()`. This fails to resolve symbolic links properly, potentially allowing attackers to supply paths with symlinks that bypass the prefix-checking boundary and exploit path traversal, leaking sensitive system or application files.
+**Learning:** Using `os.path.abspath()` is insufficient for securely verifying if a user-provided file path falls strictly within a designated safe directory when symbolic links are involved.
+**Prevention:** Always use `os.path.realpath()` instead of `os.path.abspath()` when validating that a requested path remains within a safe base directory to properly resolve symlinks and prevent path traversal vulnerabilities.

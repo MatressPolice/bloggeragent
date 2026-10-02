@@ -24,14 +24,14 @@ def setup_test_client(reload=False):
 def test_frontend_static_mount(mock_frontend_dir):
     tmpdir = str(mock_frontend_dir.parent)
 
-    # Patch os.path.abspath so that main.AGENT_DIR becomes tmpdir without changing signature
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    # Patch os.path.realpath so that main.AGENT_DIR becomes tmpdir without changing signature
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
-    with patch("os.path.abspath", side_effect=mock_abspath):
+    with patch("os.path.realpath", side_effect=mock_realpath):
         client, _ = setup_test_client(reload=True)
         response = client.get("/")
 
@@ -189,14 +189,14 @@ def test_auth_middleware_path_traversal_static(mock_frontend_dir):
     with open(os.path.join(tmpdir, "frontend-secret.txt"), "w") as f:
         f.write("secret")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")
@@ -250,11 +250,11 @@ def test_default_cors_origins():
 
     assert main_mod.allow_origins == []
 
-def test_frontend_dir_abspath_prefix_performance_optimization():
-    """Verify that the module-level FRONTEND_DIR_ABSPATH_PREFIX optimization is in place."""
-    expected_prefix = os.path.abspath(main.FRONTEND_DIR) + os.path.sep
-    assert main.FRONTEND_DIR_ABSPATH_PREFIX == expected_prefix, (
-        "FRONTEND_DIR_ABSPATH_PREFIX must be calculated at module level "
+def test_frontend_dir_realpath_prefix_performance_optimization():
+    """Verify that the module-level FRONTEND_DIR_REALPATH_PREFIX optimization is in place."""
+    expected_prefix = os.path.realpath(main.FRONTEND_DIR) + os.path.sep
+    assert main.FRONTEND_DIR_REALPATH_PREFIX == expected_prefix, (
+        "FRONTEND_DIR_REALPATH_PREFIX must be calculated at module level "
         "to avoid redundant abspath calculations in the middleware."
     )
 
@@ -266,14 +266,14 @@ def test_static_file_auth_bypass_success(mock_frontend_dir):
     with open(test_filepath, "w") as f:
         f.write("<html><body>Bypass Test</body></html>")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")
@@ -324,14 +324,14 @@ def test_performance_isdir_not_called_in_middleware(mock_frontend_dir):
     with open(test_filepath, "w") as f:
         f.write("<html><body>Perf Test</body></html>")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret"),
@@ -356,14 +356,14 @@ def test_static_cache_eviction(mock_frontend_dir):
     with open(test_filepath, "w") as f:
         f.write("<html><body>Cache Test</body></html>")
 
-    real_abspath = os.path.abspath
-    def mock_abspath(path):
-        if path.endswith("main.py"):
+    real_realpath = os.path.realpath
+    def mock_realpath(path, strict=False):
+        if str(path).endswith("main.py"):
             return os.path.join(tmpdir, "main.py")
-        return real_abspath(path)
+        return real_realpath(path)
 
     with (
-        patch("os.path.abspath", side_effect=mock_abspath),
+        patch("os.path.realpath", side_effect=mock_realpath),
         patch("main.AGENT_DIR", tmpdir),
         patch.dict(os.environ, {"API_KEY": "supersecret"}),
         patch("main.API_KEY", "supersecret")

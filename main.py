@@ -10,10 +10,10 @@ from google.adk.cli.fast_api import get_fast_api_app
 API_KEY = os.getenv("API_KEY")
 
 # Point to the directory containing your agent package
-AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
+AGENT_DIR = os.path.dirname(os.path.realpath(__file__))
 FRONTEND_DIR = os.path.join(AGENT_DIR, "frontend")
 FRONTEND_DIR_EXISTS = os.path.isdir(FRONTEND_DIR)
-FRONTEND_DIR_ABSPATH_PREFIX = os.path.abspath(FRONTEND_DIR) + os.path.sep
+FRONTEND_DIR_REALPATH_PREFIX = os.path.realpath(FRONTEND_DIR) + os.path.sep
 
 # Create the ADK FastAPI app with agent discovery
 # We pass specific allowed origins directly to get_fast_api_app so the ADK's built-in CORS
@@ -76,7 +76,7 @@ async def verify_api_key(request: Request, call_next):
         is_static = _STATIC_CACHE.get(norm_path)
         if is_static is None:
             file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-            is_static = os.path.abspath(file_path).startswith(FRONTEND_DIR_ABSPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
+            is_static = os.path.realpath(file_path).startswith(FRONTEND_DIR_REALPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
 
             if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
                 _STATIC_CACHE.clear()
