@@ -2,7 +2,7 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 8):** 7 of 15 PRs resolved (8 remaining)
+**Current Batch (Batch 8):** 8 of 15 PRs resolved (7 remaining)
 
 ---
 
@@ -17,12 +17,12 @@
 | **#75** | 🎨 Palette: Enhance accessibility for progress stepper and icons | `palette-a11y-enhancements-3768533463483403434` | Added `aria-hidden="true"` to decorative emojis/icons, added list semantics (`role="list"`/`role="listitem"`) and dynamic `aria-current="step"` to stepper in `frontend/index.html`; combined learnings in `.Jules/palette.md`. | ✅ 32/32 Tests Passing | ✅ Archived ([`3768533463483403434`](https://jules.google.com/task/3768533463483403434)) |
 | **#76** | ⚡ Bolt: [Early exit fast-path for public endpoints] | `jules-9596411366570000439-8019c3b1` | Closed as redundant. Fast-path check for `PUBLIC_PATHS` without normalization overhead was already implemented in PR #71; branch deleted and task archived. | ℹ️ Superseded by PR #71 | ✅ Archived ([`9596411366570000439`](https://jules.google.com/task/9596411366570000439)) |
 | **#77** | 🛡️ Sentinel: Add Content-Security-Policy defense-in-depth | `sentinel/add-csp-header-1718641153432080245` | Closed as redundant. CSP header already active via PR #72 without brittle hardcoded Cloud Run origin in `connect-src`; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`1718641153432080245`](https://jules.google.com/task/1718641153432080245)) |
+| **#78** | ⚡ Bolt: Add fast-path early exit for public routes | `bolt-fast-path-public-routes-4366382601739141204` | Closed as redundant. Fast-path check for `PUBLIC_PATHS` without normalization overhead was already implemented in PR #71; branch deleted and task archived. | ℹ️ Superseded by PR #71 | ✅ Archived ([`4366382601739141204`](https://jules.google.com/task/4366382601739141204)) |
 
 ---
 
 ## Remaining Open PRs in Batch 8 (15 PR Target: #71 - #85)
 
-- **PR #78**: `⚡ Bolt: Add fast-path early exit for public routes`
 - **PR #79**: `🎨 Palette: Improve stepper accessibility`
 - **PR #80**: `🧹 Remove unused RunConfig import`
 - **PR #81**: `🧹 Remove unused InvocationContext import`
