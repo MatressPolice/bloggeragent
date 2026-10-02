@@ -37,3 +37,8 @@
 **Vulnerability:** Relying solely on environment variables (`API_KEY`) for secrets can lead to exposure via process lists, logs, or debugging endpoints in production environments like Docker or Kubernetes.
 **Learning:** Best practices dictate supporting file-based secret injection (e.g., Docker Secrets mounted at `/run/secrets/...`), as reading from memory/files avoids environment variable leakage.
 **Prevention:** Always provide a fallback to read secrets from files (like `API_KEY_FILE`) when configuring applications.
+
+## 2024-10-02 - Unhandled TypeError in secrets.compare_digest
+**Vulnerability:** Passing non-ASCII strings to `secrets.compare_digest()` raises an unhandled `TypeError`, which bypasses normal error handling (returning a 500 instead of a 401) and presents a Denial of Service (DoS) vector if exploited heavily.
+**Learning:** `secrets.compare_digest()` strictly enforces ASCII when given strings and will throw an exception if given unicode characters like emojis.
+**Prevention:** Always encode user-provided input and expected secret strings to bytes (e.g., `.encode("utf-8")`) before passing them to cryptographic comparison functions to ensure safe and deterministic behavior regardless of character sets.

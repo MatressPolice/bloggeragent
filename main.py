@@ -111,7 +111,7 @@ async def verify_api_key(request: Request, call_next):
         return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
 
     token = auth_header[7:]
-    if not secrets.compare_digest(token, api_key):
+    if not secrets.compare_digest(token.encode("utf-8"), api_key.encode("utf-8")):
         return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
 
     return await call_next(request)
