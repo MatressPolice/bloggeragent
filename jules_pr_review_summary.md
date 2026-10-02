@@ -2,7 +2,7 @@
 
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
-**Current Batch (Batch 9):** 4 of 15 PRs resolved (11 remaining)
+**Current Batch (Batch 9):** 5 of 15 PRs resolved (10 remaining)
 
 ---
 
@@ -14,12 +14,12 @@
 | **#87** | 🛡️ Sentinel: [HIGH] Fix authentication bypass in middleware | `fix-auth-bypass-9421801496885460757` | Closed as redundant. Fix preventing URL-encoded traversal auth bypass was already implemented and merged in PR #86; branch deleted and task archived. | ℹ️ Superseded by PR #86 | ✅ Archived ([`9421801496885460757`](https://jules.google.com/task/9421801496885460757)) |
 | **#88** | ⚡ Bolt: Optimize static file path construction | `optimize-path-join-1799371370614039854` | Closed as obsolete/incompatible. String concatenation (`FRONTEND_DIR + norm_path`) risks path issues across OSes and branch re-introduced vulnerable `unquote`/`normpath` traversal removed in PR #86; branch deleted and task archived. | ℹ️ Superseded / Incompatible | ✅ Archived ([`1799371370614039854`](https://jules.google.com/task/1799371370614039854)) |
 | **#89** | 🎨 Palette: Enhance a11y for icons and stepper | `palette-a11y-icons-stepper-18290018473607231880` | Closed as redundant. Progress stepper list semantics and accessibility improvements were already comprehensively integrated in PR #75; branch deleted and task archived. | ℹ️ Superseded by PR #75 | ✅ Archived ([`18290018473607231880`](https://jules.google.com/task/18290018473607231880)) |
+| **#90** | 🛡️ Sentinel: [MEDIUM] Add Content-Security-Policy (CSP) header | `fix-csp-header-8643049941875652251` | Closed as redundant. CSP header was already active from PR #72 and branch attempted to reintroduce vulnerable `normpath`/`unquote` removed in PR #86; branch deleted and task archived. | ℹ️ Superseded by PR #72 | ✅ Archived ([`8643049941875652251`](https://jules.google.com/task/8643049941875652251)) |
 
 ---
 
 ## Remaining Open PRs in Batch 9 (15 PR Target: #86 - #100)
 
-- **PR #90**: `🛡️ Sentinel: [MEDIUM] Add Content-Security-Policy (CSP) header`
 - **PR #91**: `🎨 Palette: Improve screen reader accessibility for icons and stepper`
 - **PR #92**: `🛡️ Sentinel: [MEDIUM] Fix information disclosure in fallback and auth endpoints`
 - **PR #93**: `⚡ Bolt: skip path parsing overhead for cached static files`
