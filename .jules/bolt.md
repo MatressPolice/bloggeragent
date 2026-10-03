@@ -29,3 +29,7 @@
 ## 2026-09-17 - Fast-path check for public routes in auth middleware
 **Learning:** Checking a raw path string directly against a set is roughly ~90% faster than normalizing it via `posixpath.normpath(unquote(path))` beforehand. Since the vast majority of API requests use standard, unencoded paths matching standard public routes exactly, parsing paths unconditionally adds cumulative CPU overhead.
 **Action:** When implementing path-based checks, always evaluate the exact raw path first as an early exit "fast-path" before executing expensive decoding/normalization logic for edge cases.
+
+## 2025-02-18 - Removed asyncio.to_thread for fast OS operations
+**Learning:** `asyncio.to_thread` introduces overhead due to thread dispatch context switching. For fast OS operations like `os.path.isfile` (especially when metadata is cached by the OS), the thread dispatch overhead (e.g. ~2.4s per 10k calls) typically outweighs the I/O blocking time (e.g. ~0.03s per 10k calls).
+**Action:** Avoid wrapping very fast synchronous operations like `os.path.isfile` in `asyncio.to_thread` in performance-critical paths like middleware.
