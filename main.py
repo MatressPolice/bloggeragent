@@ -1,6 +1,7 @@
 import os
 import asyncio
 import secrets
+import urllib.parse
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -76,7 +77,7 @@ async def verify_api_key(request: Request, call_next):
     if raw_path in PUBLIC_PATHS:
         return await call_next(request)
 
-    norm_path = raw_path
+    norm_path = urllib.parse.unquote(raw_path)
     if norm_path.startswith("//"):
         norm_path = "/" + norm_path.lstrip("/")
 
