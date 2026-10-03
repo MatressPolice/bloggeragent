@@ -935,17 +935,24 @@
 
     <!-- Input Card -->
     <div class="input-card glass-card">
-      <form id="generateForm" class="input-group">
-        <div style="flex: 1; position: relative; display: flex; align-items: center;">
-          <input type="text" id="topicInput" class="topic-input" placeholder="e.g. Kubernetes autoscaling best practices"
-            required autocomplete="off" aria-label="Blog topic" aria-describedby="charCount" maxlength="200" autofocus style="width: 100%;" />
-          <span id="charCount" style="position: absolute; right: 16px; font-size: var(--text-xs); color: var(--text-muted); pointer-events: none;">0/200</span>
+      <form id="generateForm">
+        <div style="text-align: left; padding-bottom: var(--space-xs); padding-left: var(--space-xs);">
+          <label for="topicInput" class="step-label">
+            Blog Topic <span style="color: var(--error);" aria-hidden="true">*</span>
+          </label>
         </div>
-        <button type="submit" id="generateBtn" class="generate-btn">
-          <span class="btn-icon" aria-hidden="true">✦</span>
-          <span class="btn-text">Generate<span id="btnShortcut" class="btn-shortcut"></span></span>
-          <span class="btn-spinner" aria-hidden="true"></span>
-        </button>
+        <div class="input-group">
+          <div style="flex: 1; position: relative; display: flex; align-items: center;">
+            <input type="text" id="topicInput" class="topic-input" placeholder="e.g. Kubernetes autoscaling best practices"
+              required autocomplete="off" aria-describedby="charCount" maxlength="200" autofocus style="width: 100%;" />
+            <span id="charCount" style="position: absolute; right: 16px; font-size: var(--text-xs); color: var(--text-muted); pointer-events: none;">0/200</span>
+          </div>
+          <button type="submit" id="generateBtn" class="generate-btn">
+            <span class="btn-icon" aria-hidden="true">✦</span>
+            <span class="btn-text">Generate<span id="btnShortcut" class="btn-shortcut"></span></span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </div>
       </form>
     </div>
 
