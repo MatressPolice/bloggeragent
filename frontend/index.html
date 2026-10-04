@@ -950,14 +950,14 @@
     </div>
 
     <!-- Error Banner -->
-    <div id="errorBanner" class="error-banner" role="alert">
+    <div id="errorBanner" class="error-banner" role="alert" aria-live="assertive">
       <span aria-hidden="true">⚠</span>
       <span id="errorMessage"></span>
     </div>
 
     <!-- Stepper -->
     <div id="stepperCard" class="stepper-card glass-card">
-      <div class="stepper" role="list" aria-label="Generation progress">
+      <div class="stepper" role="list" aria-label="Generation progress" tabindex="-1">
         <div class="step pending" id="stepPlan" role="listitem">
           <div class="step-indicator" aria-hidden="true">1</div>
           <span class="step-label">Planning outline…</span>
@@ -990,7 +990,7 @@
     </div>
 
     <!-- Article Output -->
-    <div id="outputCard" class="output-card glass-card">
+    <div id="outputCard" class="output-card glass-card" tabindex="-1" aria-label="Generated Article">
       <div class="output-actions">
         <button id="copyBtn" class="action-btn" title="Copy raw Markdown to clipboard">
           <span id="copyIcon" aria-hidden="true">📋</span> <span id="copyLabel">Copy Markdown</span>
@@ -1204,6 +1204,7 @@
 
       // Start at the planning step
       activateStep("plan");
+      stepperCard.querySelector('.stepper').focus();
 
       try {
         const sessionId = await createSession();
@@ -1281,6 +1282,7 @@
         if (rawMarkdown) {
           renderFinalArticle(rawMarkdown);
           outputCard.classList.add("visible");
+          outputCard.focus();
         } else {
           showError("The agent returned an empty response. Please try a different topic.");
         }
