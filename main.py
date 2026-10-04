@@ -89,7 +89,9 @@ async def verify_api_key(request: Request, call_next):
         is_static = _STATIC_CACHE.get(norm_path)
         if is_static is None:
             file_path = os.path.join(FRONTEND_DIR, norm_path.lstrip("/"))
-            is_static = os.path.realpath(file_path).startswith(FRONTEND_DIR_REALPATH_PREFIX) and await asyncio.to_thread(os.path.isfile, file_path)
+            # ⚡ Bolt Optimization: Removed asyncio.to_thread for os.path.isfile. The thread dispatch
+            # overhead typically outweighs the I/O blocking time when file metadata is cached by the OS.
+            is_static = os.path.realpath(file_path).startswith(FRONTEND_DIR_REALPATH_PREFIX) and os.path.isfile(file_path)
 
             if len(_STATIC_CACHE) >= _MAX_CACHE_SIZE:
                 _STATIC_CACHE.clear()
