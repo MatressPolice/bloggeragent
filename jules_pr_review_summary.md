@@ -3,12 +3,26 @@
 **Repository:** `MatressPolice/bloggeragent`  
 **Primary Branch:** `master`  
 **Status:** 🎉 Complete — 100% of PRs reviewed and resolved!  
-**Total PRs Resolved to Date:** 114 PRs across Batches 1–12 (#33 – #146)  
+**Total PRs Resolved to Date:** 121 PRs across Batches 1–13 (#33 – #153)  
 **Total Remaining Open PRs in Repo:** 0 PRs  
 
 ---
 
-## Batch 12 Completed PRs (#131 - #146) [Final Batch - 100% Repository Completion]
+## Batch 13 Completed PRs (#147 - #153) [100% Repository Completion]
+
+| PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
+| :---: | :--- | :--- | :--- | :--- | :--- | :--- |
+| **#147** | 🛡️ Sentinel: [CRITICAL] Fix URL-encoded path traversal in static files route | `fix-path-traversal-13127742623779270876` | Closed as redundant/incompatible. Unquoting raw paths in `verify_api_key` reintroduces authentication bypass risks (`/%2E%2E/`), while path traversal is already safely mitigated via `os.path.realpath` in PR #132; branch deleted and task archived. | ℹ️ Superseded by PR #132 | ✅ Archived ([`13127742623779270876`](https://jules.google.com/task/13127742623779270876)) |
+| **#148** | ⚡ Bolt: Remove asyncio.to_thread overhead for os.path.isfile | `bolt-perf-optimization-3528442610042735946` | Closed as incompatible. As documented in PR #123 and PR #142, removing `asyncio.to_thread` introduces blocking synchronous file I/O into the ASGI event loop; branch deleted and task archived. | ℹ️ Incompatible / Blocking I/O | ✅ Archived ([`3528442610042735946`](https://jules.google.com/task/3528442610042735946)) |
+| **#149** | 🎨 Palette: Add visible label to topic input | `palette-add-visible-label-6450807131458212450` | Added persistent semantic `<label for="topicInput">` with required marker in `frontend/index.html` improving input context and screen reader clarity; documented learnings in `.jules/palette.md`. | ✅ 42/42 Tests Passing | ✅ Archived ([`6450807131458212450`](https://jules.google.com/task/6450807131458212450)) |
+| **#150** | ⚡ Bolt: Remove asyncio.to_thread overhead for os.path.isfile | `bolt-perf-isfile-13481436783782839755` | Closed as incompatible duplicate of PR #148. Removing `asyncio.to_thread` introduces blocking synchronous file I/O into the ASGI event loop; branch deleted and task archived. | ℹ️ Incompatible / Blocking I/O | ✅ Archived ([`13481436783782839755`](https://jules.google.com/task/13481436783782839755)) |
+| **#151** | 🎨 Palette: Improve focus management and screen reader support | `palette-a11y-focus-18385041490173847611` | Added `aria-live="assertive"` to error banner, `tabindex="-1"` and programmatic focus management to stepper and output card during generation in `frontend/index.html`; resolved documentation conflict in `.jules/palette.md`. | ✅ 42/42 Tests Passing | ✅ Archived ([`18385041490173847611`](https://jules.google.com/task/18385041490173847611)) |
+| **#152** | ⚡ Bolt: Remove asyncio.to_thread for fast OS operations | `bolt-optimize-isfile-15464400222969705051` | Closed as incompatible duplicate of PR #148 / #150. Removing `asyncio.to_thread` introduces blocking synchronous file I/O into the ASGI event loop; branch deleted and task archived. | ℹ️ Incompatible / Blocking I/O | ✅ Archived ([`15464400222969705051`](https://jules.google.com/task/15464400222969705051)) |
+| **#153** | Acknowledge superseded PR | `acknowledge-superseded-7621641190965417612` | Closed as superseded (0 diff). Superseded PR acknowledgment task archived; branch deleted. | ℹ️ Superseded (0 diff) | ✅ Archived ([`7621641190965417612`](https://jules.google.com/task/7621641190965417612)) |
+
+---
+
+## Batch 12 Completed PRs (#131 - #146)
 
 | PR # | Title | Branch | Resolution / Key Changes | Verification Status | Jules Task Archived |
 | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
