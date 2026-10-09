@@ -28,3 +28,8 @@
 ## 2025-01-30 - Replace aria-label with persistent visible label on primary input
 **Learning:** Relying solely on `aria-label` and `placeholder` for primary text inputs creates a poor UX because users lose context of the field's purpose after they start typing.
 **Action:** Always provide a semantic `<label>` element for main inputs, particularly in Hero sections, keeping it visible for continuous context and explicitly marking required fields.
+
+## 2024-10-04 - Focus Management on Async Operations
+**Learning:** When a primary action button (like "Generate") becomes disabled during a long-running async operation, keyboard focus is often lost (dropping to the `<body>`), leaving screen reader users confused about what happened. Simply showing a stepper isn't enough; focus must be actively moved to the progress indicator, and subsequently to the final output.
+**Action:** Always programmatically move focus (`.focus()` on a `tabindex="-1"` container) to the loading state and then to the result container when disabling triggering buttons.
+
